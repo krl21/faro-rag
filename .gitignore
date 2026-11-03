@@ -1,0 +1,55 @@
+# --- Secretos / entorno ---
+.env
+.env.*
+!.env.example
+!.env.template
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- RAG: índices, vector stores y caches locales ---
+chroma/
+chroma_db/
+.chroma/
+faiss_index/
+*.faiss
+qdrant_storage/
+lancedb/
+.cache/
+
+# --- Datos locales ---
+# data/
+# *.pdf
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Editores ---
+.idea/
+.vscode/
