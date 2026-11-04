@@ -9,3 +9,4 @@ class FieldStatus(StrEnum):
     OK = "ok"
     NOT_FOUND = "not_found"  # The document does not contain the value: not an error.
     FAILED = "failed"
+    EDITED = "edited"  # Value set or corrected by the user.
