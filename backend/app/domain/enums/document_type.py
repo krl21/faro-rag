@@ -8,4 +8,4 @@ class DocumentType(StrEnum):
 
     POLICY = "policy"
     INVOICE = "invoice"
-    OTHER = "other"
+    UNKNOWN = "unknown"  # Neither a policy nor an invoice: not used by the chat.
