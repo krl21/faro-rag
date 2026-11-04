@@ -1,5 +1,6 @@
 """Use case: the user sets or corrects the value of an extracted field."""
 
+import dataclasses
 import logging
 import uuid
 from collections.abc import Callable
@@ -9,18 +10,19 @@ from typing import Any
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.ai.extraction.field_indexing import build_field_values
-from app.ai.extraction.field_specs import FieldSpec, find_spec
+from app.ai.extraction.field_indexing import filter_columns
 from app.ai.extraction.field_validation import format_errors
+from app.ai.extraction.specs import FieldSpec, find_spec
 from app.core.errors import (
     DocumentNotFoundError,
     DocumentNotReadyError,
     FieldNotFoundError,
     InvalidFieldValueError,
 )
+from app.core.flow_logging import fields
 from app.core.telemetry import get_tracer
 from app.db.models import ExtractedField
-from app.db.repositories import DocumentRepository, FieldRepository, FieldValueRepository
+from app.db.repositories import DocumentRepository, FieldRepository
 from app.domain.dtos import FieldDraft
 from app.domain.enums import DocumentStatus, FieldStatus
 
@@ -42,7 +44,6 @@ class FieldEditService:
         self._session = session
         self._documents = DocumentRepository(session)
         self._fields = FieldRepository(session)
-        self._field_values = FieldValueRepository(session)
         self._clock = clock
 
     def edit(self, document_id: uuid.UUID, name: str, value: Any) -> tuple[ExtractedField, str]:
@@ -52,7 +53,7 @@ class FieldEditService:
         ``failed`` ones (the user fills in the missing value). The value is
         validated with the same Pydantic type as the LLM output. The LLM value
         is kept in ``original_value`` the first time, and the chat filter index
-        of that field is rebuilt in the same transaction.
+        columns of that field are refreshed in the same transaction.
 
         Args:
             document_id: Document identifier.
@@ -88,6 +89,7 @@ class FieldEditService:
             new_value = self._validated(spec, value)
 
             field = self._fields.get(document_id, name) or self._new_field(document_id, name)
+            previous_status = field.status
             if field.status != FieldStatus.EDITED:
                 field.original_value = field.value  # Keep the LLM value once.
             field.value = new_value
@@ -104,11 +106,31 @@ class FieldEditService:
                 error=None,
                 attempts=field.attempts,
             )
-            self._field_values.replace_for_field(document_id, name, build_field_values([draft]))
+            # Refresh the filter columns of the same row, so the chat filters use the new value.
+            columns = filter_columns(draft)
+            if columns is None:
+                field.set_filter_columns()
+            else:
+                field.set_filter_columns(**dataclasses.asdict(columns))
             self._session.commit()
             self._session.refresh(field)
             logger.info(
-                "field edited by the user", extra={"document_id": str(document_id), "field": name}
+                "field edited by the user",
+                extra=fields(
+                    document_id=str(document_id),
+                    field=name,
+                    value_type=spec.value_type.value,
+                    first_edit=previous_status != FieldStatus.EDITED,
+                ),
+            )
+            logger.debug(
+                "field edit values",
+                extra=fields(
+                    document_id=str(document_id),
+                    field=name,
+                    original_value=field.original_value,
+                    new_value=new_value,
+                ),
             )
             return field, document.document_type
 
