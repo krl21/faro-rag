@@ -1,0 +1,26 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.inputs > * {
+  flex: 1 1 160px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-small);
+}
