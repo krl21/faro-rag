@@ -18,8 +18,8 @@ DOCUMENT_TYPE_ES = {
     "pólizas": DocumentType.POLICY,
     "factura": DocumentType.INVOICE,
     "facturas": DocumentType.INVOICE,
-    "otro": DocumentType.OTHER,
-    "otros": DocumentType.OTHER,
+    "desconocido": DocumentType.UNKNOWN,
+    "desconocidos": DocumentType.UNKNOWN,
 }
 """Spanish document type label (lower case, singular or plural) to its enum."""
 
@@ -64,7 +64,7 @@ def confidence_from_spanish(value: Any) -> Any:
 
 
 def document_type_from_spanish(value: Any) -> Any:
-    """Map ``poliza``/``factura``/``otro`` (singular or plural) to the English enum.
+    """Map ``poliza``/``factura``/``desconocido`` (singular or plural) to the English enum.
 
     Args:
         value: Raw document type.
@@ -73,6 +73,27 @@ def document_type_from_spanish(value: Any) -> Any:
         The translated type.
     """
     return translate(value, DOCUMENT_TYPE_ES)
+
+
+def classified_type_from_spanish(value: Any) -> Any:
+    """Map the type returned by the classifier, treating anything unexpected as ``unknown``.
+
+    ``poliza``/``factura``/``desconocido`` map to their enum. Any other text
+    the model returns (``otro``, ``contrato``, ``carta``...) means the
+    document is neither a policy nor an invoice, so it becomes ``unknown``
+    instead of an invalid answer that would be retried.
+
+    Args:
+        value: Raw ``tipo`` from the LLM.
+
+    Returns:
+        The document type, or ``value`` unchanged when it is not a string
+        (so a missing or non-text type is still rejected).
+    """
+    translated = document_type_from_spanish(value)
+    if isinstance(value, str) and translated not in set(DocumentType):
+        return DocumentType.UNKNOWN
+    return translated
 
 
 def filter_field_from_spanish(value: Any) -> Any:
