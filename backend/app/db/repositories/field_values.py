@@ -44,3 +44,34 @@ class FieldValueRepository:
             for d in drafts
         )
         self._session.flush()
+
+    def replace_for_field(
+        self, document_id: uuid.UUID, field_name: str, drafts: Sequence[FieldValueDraft]
+    ) -> None:
+        """Replace the indexed values of one field in the current transaction.
+
+        Used when the user edits a field, so the chat filters use the new value.
+
+        Args:
+            document_id: Owning document.
+            field_name: Field whose values are replaced.
+            drafts: New values of that field.
+        """
+        self._session.execute(
+            delete(FieldValue).where(
+                FieldValue.document_id == document_id, FieldValue.field_name == field_name
+            )
+        )
+        self._session.add_all(
+            FieldValue(
+                document_id=document_id,
+                field_name=d.field_name,
+                text_value=d.text_value,
+                number_value=d.number_value,
+                currency=d.currency,
+                date_from=d.date_from,
+                date_to=d.date_to,
+            )
+            for d in drafts
+        )
+        self._session.flush()
