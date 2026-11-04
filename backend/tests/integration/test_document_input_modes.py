@@ -75,9 +75,9 @@ def test_text_mode_classifies_with_the_start_only(clean_database):
     document_id = _pending(make_pdf([COVER, COVER, INVOICE_PAGE]))
     llm = FakeLLMProvider()
     document = _process(document_id, DocumentInput.TEXT, llm)
-    assert document.document_type == DocumentType.OTHER
+    assert document.document_type == DocumentType.UNKNOWN
     assert all(not messages[-1].attachments for _, messages in llm.calls)
-    assert [purpose for purpose, _ in llm.calls] == ["classify"]  # "other": no extraction.
+    assert [purpose for purpose, _ in llm.calls] == ["classify"]  # "unknown": no extraction.
 
 
 def test_text_mode_extraction_gets_every_page(clean_database):
