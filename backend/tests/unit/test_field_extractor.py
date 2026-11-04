@@ -142,17 +142,17 @@ def test_failed_classification_skips_field_extraction():
     assert all(purpose == "classify" for purpose, _ in llm.calls)
 
 
-def test_other_document_gets_no_fields_and_a_single_llm_call():
+def test_unknown_document_gets_no_fields_and_a_single_llm_call():
     llm = FakeLLMProvider()
     result = _extractor(llm, []).run(_doc("Acta de reunión del 05/03/2025\nAsistentes varios"))
-    assert result.document_type is DocumentType.OTHER
+    assert result.document_type is DocumentType.UNKNOWN
     assert [f.name for f in result.fields] == ["document_type"]
     assert [purpose for purpose, _ in llm.calls] == ["classify"]
 
 
-def test_extract_fields_of_other_is_empty_without_calling_the_llm():
+def test_extract_fields_of_unknown_is_empty_without_calling_the_llm():
     llm = FakeLLMProvider()
-    assert _extractor(llm, []).extract_fields(DocumentType.OTHER, _doc("Acta")) == []
+    assert _extractor(llm, []).extract_fields(DocumentType.UNKNOWN, _doc("Acta")) == []
     assert llm.calls == []
 
 
