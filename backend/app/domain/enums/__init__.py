@@ -6,9 +6,12 @@ from app.domain.enums.confidence import Confidence
 from app.domain.enums.document_input import DocumentInput
 from app.domain.enums.document_status import DocumentStatus
 from app.domain.enums.document_type import DocumentType
+from app.domain.enums.embedding_provider_name import EmbeddingProviderName
 from app.domain.enums.field_status import FieldStatus
 from app.domain.enums.field_value_type import FieldValueType
 from app.domain.enums.filter_field import FilterField
+from app.domain.enums.llm_provider_name import LLMProviderName
+from app.domain.enums.pdf_extractor_name import PdfExtractorName
 
 __all__ = [
     "AskMode",
@@ -17,7 +20,10 @@ __all__ = [
     "DocumentInput",
     "DocumentStatus",
     "DocumentType",
+    "EmbeddingProviderName",
     "FieldStatus",
     "FieldValueType",
     "FilterField",
+    "LLMProviderName",
+    "PdfExtractorName",
 ]
