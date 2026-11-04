@@ -30,7 +30,7 @@ describe('DocumentsPage', () => {
             status: 'failed',
             error: { code: 'no_extractable_text', message: 'No text' },
           }),
-          makeDocument({ id: '3', filename: 'menu.pdf', document_type: 'other' }),
+          makeDocument({ id: '3', filename: 'menu.pdf', document_type: 'unknown' }),
         ]),
       ),
     );
@@ -79,7 +79,7 @@ describe('DocumentsPage', () => {
     renderPage();
 
     await userEvent.upload(screen.getByLabelText('Seleccionar PDF'), pdf());
-    expect(await screen.findByRole('status')).toHaveTextContent('«poliza.pdf» ya estaba subido');
+    expect(await screen.findByRole('alert')).toHaveTextContent('«poliza.pdf» ya está almacenado');
   });
 
   it('shows the API error when the upload is rejected', async () => {
