@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from app.ai.providers.factory import get_embedding_provider
+from app.api.request_logging import log_requests
 from app.api.routes import ask, conversations, document_ask, document_fields, documents, health
 from app.config import get_settings
 from app.core.exception_handlers import register_exception_handlers
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     register_exception_handlers(app)
+    app.middleware("http")(log_requests)
     app.include_router(health.router)
     app.include_router(documents.router)
     app.include_router(document_fields.router)
