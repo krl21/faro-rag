@@ -1,0 +1,20 @@
+.card {
+  flex: 1 1 140px;
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.label {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.value {
+  margin: 4px 0 0;
+  color: var(--tone);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
