@@ -1,0 +1,237 @@
+# Local stack. Start everything with `make up` (or `docker compose up --build`).
+# Development with automatic updates: `make dev` (`docker compose up --build --watch`).
+# The `tests` service only runs with the `test` profile (`make test`).
+
+# Configuration of the backend containers: .env.example gives every value and
+# .env (optional) overrides it. Without .env the example values are used, and
+# the `env-check` service prints a notice; without .env.example Compose fails.
+x-backend-env: &backend-env
+  env_file:
+    - path: .env.example
+      required: true
+    - path: .env
+      required: false
+  environment:
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-faro}:${POSTGRES_PASSWORD:-faro}@postgres:5432/${POSTGRES_DB:-faro}
+    REDIS_URL: redis://redis:6379/0
+    STORAGE_DIR: /data/uploads
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+
+# Compose Watch: the containers run the code baked into the image; on every
+# saved change compose copies the file into the container. Dependency changes
+# rebuild the image.
+x-watch-ignore: &watch-ignore
+  - .venv/
+  - .tools/
+  - tests/
+  - "**/__pycache__/"
+  - .pytest_cache/
+  - .ruff_cache/
+
+x-backend-depends: &backend-depends
+  postgres:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-faro}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-faro}
+      POSTGRES_DB: ${POSTGRES_DB:-faro}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"   # for local DB clients
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-faro} -d ${POSTGRES_DB:-faro}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    # Not published to the host: only the containers use it.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Runs once before the backend and tells which configuration file is used.
+  env-check:
+    image: alpine:3.20
+    volumes:
+      - ./:/project:ro
+    command:
+      - sh
+      - -c
+      - |
+        if [ -f /project/.env ]; then
+          echo "configuracion: se usa .env"
+        elif [ -f /project/.env.example ]; then
+          echo "AVISO: no existe .env; se usa .env.example. Crea .env (make env) para personalizar la configuracion."
+        else
+          echo "ERROR: no existe .env ni .env.example." >&2
+          exit 1
+        fi
+    restart: "no"
+
+  migrate:
+    build:
+      context: ./backend
+      target: api
+    <<: *backend-env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      <<: *backend-depends
+      env-check:
+        condition: service_completed_successfully
+    restart: "no"
+
+  api:
+    build:
+      context: ./backend
+      target: api
+    <<: *backend-env
+    # --reload restarts uvicorn when Compose Watch syncs a changed file.
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - uploads:/data/uploads
+      - hf-cache:/data/hf-cache
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore: *watch-ignore
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
+    ports:
+      - "8000:8000"
+    depends_on:
+      <<: *backend-depends
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  worker:
+    build:
+      context: ./backend
+      target: worker
+    <<: *backend-env
+    # Time for a warm shutdown (SIGTERM): Celery finishes the running task
+    # before stopping. Worst case per document is ~150 s (LLM timeout of 20 s,
+    # 3 attempts with 2 s and 6 s waits, for classification and extraction),
+    # so 3 minutes. An idle worker stops in about 3 s.
+    stop_grace_period: 3m
+    volumes:
+      - uploads:/data/uploads
+      - hf-cache:/data/hf-cache
+    develop:
+      watch:
+        # Celery does not reload code: the worker restarts after each sync.
+        - action: sync+restart
+          path: ./backend/app
+          target: /app/app
+          ignore:
+            - "**/__pycache__/"
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
+    depends_on:
+      <<: *backend-depends
+      migrate:
+        condition: service_completed_successfully
+
+  tests:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      target: test
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-faro}:${POSTGRES_PASSWORD:-faro}@postgres:5432/faro_test
+      REDIS_URL: redis://redis:6379/1
+      STORAGE_DIR: /tmp/uploads
+      LLM_PROVIDER: fake
+      EMBEDDING_PROVIDER: fake
+      OTEL_ENABLED: "false"
+      ASK_RATE_LIMIT: 1000/minute
+    # The tests run the current code (including tests/) without rebuilding.
+    volumes:
+      - ./backend:/app
+    depends_on: *backend-depends
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.116.1
+    command: ["--config=/etc/otel-collector.yaml"]
+    volumes:
+      - ./infra/otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.64.0
+    ports:
+      - "16686:16686"   # Jaeger UI
+
+  # Frontend built and served by nginx, which also proxies /api to the api
+  # service. Part of `make up`: http://localhost:3000
+  web:
+    build:
+      context: ./frontend
+      target: prod
+      args:
+        MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-20}
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        # nginx resolves the `api` host name at startup
+        condition: service_healthy
+
+  # Frontend with hot reload (Vite dev server), only with `make dev`:
+  # http://localhost:5173. Vite proxies /api to the api service.
+  # Also runs the frontend lint, format and tests (`make lint-web`, `make test-web`).
+  web-dev:
+    profiles: ["dev"]
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      API_PROXY_TARGET: http://api:8000
+      VITE_MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-20}
+    ports:
+      - "5173:5173"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - coverage/
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/package-lock.json
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  uploads:
+  hf-cache:
