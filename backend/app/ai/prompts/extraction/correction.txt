@@ -1,0 +1,3 @@
+Tu respuesta anterior no es válida:
+$error
+Devuelve de nuevo el objeto JSON completo corrigiendo esos errores.
