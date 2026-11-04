@@ -1,0 +1,9 @@
+Fecha de hoy: $today (zona horaria $timezone)
+
+<historial>
+(sin mensajes anteriores)
+</historial>
+
+<peticion>
+$question
+</peticion>
