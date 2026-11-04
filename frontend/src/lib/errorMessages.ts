@@ -59,7 +59,7 @@ export function documentErrorMessage(error: DocumentError): string {
   return messageForCode(error.code, MESSAGES.processing_failed);
 }
 
-/** Note for documents of type `other`: processed, but not queryable. */
+/** Note for documents of type `unknown`: processed, but not queryable. */
 export const OUT_OF_SCOPE_MESSAGE = MESSAGES.document_not_queryable as string;
 
 /** Spanish message for any thrown value: by code, then by HTTP status. */
