@@ -3,7 +3,7 @@
 import uuid
 from collections.abc import Sequence
 
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.db.models import ExtractedField
@@ -40,7 +40,23 @@ class FieldRepository:
                 status=d.status,
                 error=d.error,
                 attempts=d.attempts,
+                page=d.page,
             )
             for d in drafts
         )
         self._session.flush()
+
+    def get(self, document_id: uuid.UUID, name: str) -> ExtractedField | None:
+        """Fetch one field of a document.
+
+        Args:
+            document_id: Owning document.
+            name: Field name.
+
+        Returns:
+            The field, or ``None`` if the document has no field with that name.
+        """
+        stmt = select(ExtractedField).where(
+            ExtractedField.document_id == document_id, ExtractedField.name == name
+        )
+        return self._session.scalar(stmt)
