@@ -5,7 +5,7 @@ Guía para trabajar con el backend desde la consola. Todo corre en Docker, tambi
 ## 0. Primera vez
 
 ```bash
-cp .env.example .env     # o `make env`
+cp .env.example .env     # o `make env`; opcional: sin .env se usa .env.example (con aviso)
 make lock                # genera backend/uv.lock (solo la primera vez o al cambiar dependencias)
 ```
 
@@ -27,6 +27,8 @@ Qué pasa al guardar un fichero:
 | `backend/pyproject.toml` o `backend/uv.lock` | **Reconstruye** la imagen y recrea el contenedor | lo que tarde el `build` |
 
 El worker se para de forma ordenada: al recibir la señal de parada, Celery termina la tarea en curso antes de salir. Docker le da hasta **3 minutos** (`stop_grace_period`), lo que tarda en el peor caso un documento con todos los reintentos del LLM. Sin tareas, se para en unos 3 s. Si aun así se agotara el tiempo, la tarea no se pierde: vuelve a la cola y se procesa de nuevo (`acks_late`).
+
+Los **prompts** del LLM están en `backend/app/ai/prompts/**/*.txt`. Se cargan al arrancar cada proceso, así que al guardar uno Compose Watch reinicia la API y el worker, y el cambio se aplica en unos segundos.
 
 Lo que **no** se aplica solo:
 
