@@ -1,0 +1,71 @@
+.row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 2.4fr) auto auto;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.row[data-tone='warning'],
+.row[data-tone='danger'] {
+  border-color: color-mix(in srgb, var(--tone) 60%, transparent);
+}
+
+.name {
+  color: var(--color-text-secondary);
+}
+
+.value {
+  min-width: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.missing {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.note {
+  margin: 2px 0 0;
+  color: var(--tone);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+}
+
+.original {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: 500;
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  white-space: nowrap;
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 760px) {
+  .row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .value,
+  .meta {
+    grid-column: 1 / -1;
+  }
+}
