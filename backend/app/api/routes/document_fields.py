@@ -1,12 +1,16 @@
 """Edition of extracted fields by the user."""
 
+import logging
 import uuid
 
 from fastapi import APIRouter
 
 from app.api.deps import FieldEditServiceDep
 from app.api.mappers import to_field_out
+from app.core.flow_logging import fields
 from app.schemas.documents import ExtractedFieldOut, FieldUpdateRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -40,5 +44,9 @@ def update_field(
     Returns:
         The updated field.
     """
+    logger.debug(
+        "field edit received",
+        extra=fields(document_id=str(document_id), field=field_name, value=body.value),
+    )
     field, document_type = service.edit(document_id, field_name, body.value)
     return to_field_out(field, document_type)
