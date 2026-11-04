@@ -7,7 +7,8 @@ import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { useDocument } from '../hooks/useDocument';
 import { useDocuments } from '../hooks/useDocuments';
-import { errorMessage, messageForCode } from '../lib/errorMessages';
+import { isOutOfScope, isQueryable } from '../lib/documentRules';
+import { documentErrorMessage, errorMessage, OUT_OF_SCOPE_MESSAGE } from '../lib/errorMessages';
 import { documentTypeLabel } from '../lib/labels';
 import { isActiveStatus } from '../lib/polling';
 import styles from './Page.module.css';
@@ -23,10 +24,12 @@ function DocumentFields({ document }: { document: DocumentDetail }) {
   if (document.status === 'failed') {
     return (
       <Banner tone="danger">
-        No se pudo procesar el documento.{' '}
-        {document.error && messageForCode(document.error.code, document.error.message)}
+        No se pudo procesar el documento. {document.error && documentErrorMessage(document.error)}
       </Banner>
     );
+  }
+  if (isOutOfScope(document)) {
+    return <Banner tone="info">{OUT_OF_SCOPE_MESSAGE}</Banner>;
   }
   if (document.fields.length === 0) {
     return <EmptyState>Este documento no tiene campos extraídos.</EmptyState>;
@@ -49,8 +52,8 @@ interface FieldsPageProps {
 export function FieldsPage({ documentId, onSelectDocument }: FieldsPageProps) {
   const documents = useDocuments();
   const list = documents.data ?? [];
-  // From the menu without a choice: the most recent processed document (the list is newest first).
-  const selectedId = documentId ?? list.find((d) => d.status === 'done')?.id ?? null;
+  // From the menu without a choice: the most recent queryable document (the list is newest first).
+  const selectedId = documentId ?? list.find(isQueryable)?.id ?? null;
   const detail = useDocument(selectedId);
   const document = detail.data;
 
