@@ -67,6 +67,13 @@ class DocumentNotReadyError(FaroError):
     status_code = 409
 
 
+class DocumentNotQueryableError(FaroError):
+    """The document is not a policy or an invoice, so the chat does not use it."""
+
+    code = "document_not_queryable"
+    status_code = 409
+
+
 class FieldNotFoundError(FaroError):
     """The document type has no field with that name, or it cannot be edited."""
 
@@ -144,3 +151,7 @@ class EmbeddingDimensionError(FaroError):
 
     code = "embedding_dimension_mismatch"
     status_code = 500
+
+
+class InvalidLLMOutputError(ValueError):
+    """The LLM answer is not valid JSON or does not match the expected schema."""
