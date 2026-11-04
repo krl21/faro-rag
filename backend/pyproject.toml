@@ -1,0 +1,88 @@
+[project]
+name = "faro-rag-backend"
+version = "0.1.0"
+description = "RAG portal for insurance policies and invoices: async ingestion, verifiable citations and end-to-end tracing."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.12",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36,<2.1",  # OTel instrumentation supports < 2.1
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3.6",
+    "alembic>=1.14",
+    "celery[redis]>=5.4",
+    "redis>=5.2",
+    "litellm>=1.55",
+    "pypdf>=5.1",
+    "slowapi>=0.1.9",
+    "tzdata>=2024.2",  # IANA time zones (America/Toronto) inside the slim image
+    "opentelemetry-api>=1.28",
+    "opentelemetry-sdk>=1.28",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28",
+    "opentelemetry-instrumentation-fastapi>=0.49b0",
+    "opentelemetry-instrumentation-celery>=0.49b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.49b0",
+    "opentelemetry-instrumentation-redis>=0.49b0",
+]
+
+[project.optional-dependencies]
+# Local embeddings (API and worker images). Not installed in the test image.
+local-embeddings = ["sentence-transformers>=3.3", "torch>=2.5"]
+# Advanced PDF extraction (worker image only). Enable with PDF_EXTRACTOR=docling.
+docling = ["docling>=2.14", "torchvision>=0.20"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "httpx>=0.28",
+    "ruff>=0.8",
+]
+
+# CPU-only PyTorch: avoids downloading several GB of CUDA libraries.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+# Docling pulls torchvision: it must come from the same index as torch.
+torchvision = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Project-local uv, Python and package cache (see DESARROLLO.md, section 6).
+extend-exclude = [".tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "D", "S", "SIM", "RUF"]
+ignore = [
+    "D104", # empty package __init__ files
+    "RUF001", "RUF002", "RUF003", # Spanish text uses accents and typographic quotes
+]
+
+[tool.ruff.lint.isort]
+# The local alembic/ folder holds migrations; the package is third-party.
+known-third-party = ["alembic"]
+known-first-party = ["app", "tests"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D", "S105", "S106", "S108"]
+"alembic/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+markers = ["integration: needs PostgreSQL and Redis from docker compose"]
