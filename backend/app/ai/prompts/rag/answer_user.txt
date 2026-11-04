@@ -1,0 +1,7 @@
+<contexto>
+$context
+</contexto>
+
+<pregunta>
+$question
+</pregunta>
