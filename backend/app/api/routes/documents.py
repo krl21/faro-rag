@@ -1,5 +1,6 @@
 """Document endpoints: upload, list and detail."""
 
+import logging
 import uuid
 from typing import Annotated
 
@@ -7,9 +8,12 @@ from fastapi import APIRouter, File, Query, Response, UploadFile, status
 
 from app.api.deps import DocumentServiceDep, SettingsDep
 from app.api.mappers import to_detail, to_summary
+from app.core.flow_logging import fields
 from app.schemas.documents import DocumentDetail, DocumentSummary, DocumentUploadResponse
 from app.services.document_service import DUPLICATE_MESSAGE, REQUEUED_MESSAGE
 from app.services.file_validation import validate_pdf_upload
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -51,6 +55,12 @@ def upload_document(
     filename = validate_pdf_upload(
         file.filename, file.content_type, content, settings.max_upload_bytes
     )
+    logger.debug(
+        "upload received",
+        extra=fields(
+            filename=file.filename, content_type=file.content_type, size_bytes=len(content)
+        ),
+    )
     result = service.upload(filename, content)
     if result.requeued:
         return DocumentUploadResponse(
@@ -88,6 +98,7 @@ def list_documents(
     Returns:
         The documents.
     """
+    logger.debug("document list requested", extra=fields(limit=limit, offset=offset))
     return [to_summary(d) for d in service.list(limit=limit, offset=offset)]
 
 
@@ -102,5 +113,6 @@ def get_document(document_id: uuid.UUID, service: DocumentServiceDep) -> Documen
     Returns:
         The document detail.
     """
+    logger.debug("document detail requested", extra=fields(document_id=str(document_id)))
     document, chunk_count = service.get(document_id)
     return to_detail(document, chunk_count)
