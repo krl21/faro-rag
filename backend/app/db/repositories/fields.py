@@ -1,7 +1,9 @@
 """Repository for ``ExtractedField`` rows."""
 
+import dataclasses
 import uuid
 from collections.abc import Sequence
+from typing import Any
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -41,6 +43,7 @@ class FieldRepository:
                 error=d.error,
                 attempts=d.attempts,
                 page=d.page,
+                **_filter_columns(d),
             )
             for d in drafts
         )
@@ -60,3 +63,15 @@ class FieldRepository:
             ExtractedField.document_id == document_id, ExtractedField.name == name
         )
         return self._session.scalar(stmt)
+
+
+def _filter_columns(draft: FieldDraft) -> dict[str, Any]:
+    """Return the filter columns of a draft as model keyword arguments.
+
+    Args:
+        draft: Field to store.
+
+    Returns:
+        The typed columns, or an empty dict when the field has none.
+    """
+    return dataclasses.asdict(draft.filter_columns) if draft.filter_columns else {}
