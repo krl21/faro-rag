@@ -18,7 +18,7 @@ describe('FieldRow', () => {
     renderRow();
     expect(screen.getByText('Número de póliza')).toBeInTheDocument();
     expect(screen.getByText('FS-2024-001')).toBeInTheDocument();
-    expect(screen.getByText('p. 1 · Confianza alta')).toBeInTheDocument();
+    expect(screen.getByText('pág. 1 · Confianza alta')).toBeInTheDocument();
     expect(screen.getByText('Correcto')).toBeInTheDocument();
   });
 
@@ -37,13 +37,16 @@ describe('FieldRow', () => {
         confidence: null,
         status: 'failed',
         attempts: 3,
-        error: 'importe negativo',
+        error: 'Invalid LLM output after 3 attempts: valor.importe: Input should be >= 0',
       }),
     );
     expect(screen.getByText('Sin valor')).toBeInTheDocument();
     expect(
-      screen.getByText('Validación fallida tras 2 reintentos: importe negativo'),
+      screen.getByText(
+        'Validación fallida tras 2 reintentos: el importe o la moneda no son válidos',
+      ),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Invalid LLM output/)).not.toBeInTheDocument();
   });
 
   it('does not offer editing for read-only fields', () => {
@@ -94,7 +97,7 @@ describe('FieldRow', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      "El valor no es válido. Invalid value for 'policy_number'",
+      'El valor no es válido. Revisa el formato e inténtalo de nuevo.',
     );
   });
 });
