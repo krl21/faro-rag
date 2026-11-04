@@ -124,7 +124,7 @@ def classify(text: str) -> str:
         text: Document text.
 
     Returns:
-        JSON with ``tipo`` (``poliza``, ``factura`` or ``otro``) and ``confianza``.
+        JSON with ``tipo`` (``poliza``, ``factura`` or ``desconocido``) and ``confianza``.
     """
     lowered = text.lower()
     if "factura" in lowered:
@@ -132,7 +132,7 @@ def classify(text: str) -> str:
     elif "póliza" in lowered or "poliza" in lowered:
         doc_type = "poliza"
     else:
-        doc_type = "otro"
+        doc_type = "desconocido"
     return json.dumps({"tipo": doc_type, "confianza": "alta"})
 
 
