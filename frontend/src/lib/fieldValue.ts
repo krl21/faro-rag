@@ -25,6 +25,19 @@ export function formatFieldValue(value: FieldValue, type: FieldValueType, fieldN
   }
 }
 
+/**
+ * Why an extracted value of this type can be rejected. Shown instead of the
+ * API `error`, which is a technical text in English.
+ */
+export const INVALID_VALUE_REASONS: Record<FieldValueType, string> = {
+  text: 'el texto extraído no es válido',
+  long_text: 'el texto extraído no es válido',
+  date: 'la fecha extraída no es válida',
+  period: 'las fechas de vigencia no son válidas',
+  money: 'el importe o la moneda no son válidos',
+  text_list: 'la lista extraída no es válida',
+};
+
 // --- Editing ----------------------------------------------------------------
 
 /** One input of the editor of a value type. */
@@ -73,6 +86,31 @@ export function toDraft(value: FieldValue | null, type: FieldValueType): Draft {
     default:
       return { value: String(value) };
   }
+}
+
+const CURRENCY = /^[A-Za-z]{3}$/;
+
+/**
+ * Problems the user can fix before saving, in Spanish. The API validates
+ * again; these checks only explain the usual mistakes.
+ *
+ * @returns The problem, or `null` when the draft looks valid.
+ */
+export function draftError(draft: Draft, type: FieldValueType): string | null {
+  const get = (key: string) => (draft[key] ?? '').trim();
+  if (type === 'period' && get('start') && get('end') && get('end') < get('start')) {
+    return 'La fecha de fin no puede ser anterior a la de inicio.';
+  }
+  if (type === 'money') {
+    const amount = get('amount');
+    if (amount && !(Number(amount) >= 0))
+      return 'El importe debe ser un número igual o mayor que 0.';
+    const currency = get('currency');
+    if (currency && !CURRENCY.test(currency)) {
+      return 'La moneda debe ser un código de 3 letras, por ejemplo EUR.';
+    }
+  }
+  return null;
 }
 
 /**
