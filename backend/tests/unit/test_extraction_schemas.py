@@ -82,9 +82,37 @@ def test_money_rejects_more_than_two_decimals():
         Money.model_validate({"importe": "10.555", "moneda": "EUR"})
 
 
-def test_unknown_document_type_is_rejected():
+@pytest.mark.parametrize(
+    "label", ["desconocido", "Desconocido", "otro", "contrato", "carta", "nómina"]
+)
+def test_any_type_that_is_not_policy_or_invoice_is_unknown(label):
+    result = Classification.model_validate({"tipo": label, "confianza": "alta"})
+    assert result.document_type is DocumentType.UNKNOWN
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"), [("poliza", "policy"), ("Póliza", "policy"), ("factura", "invoice")]
+)
+def test_known_types_keep_their_value(label, expected):
+    assert (
+        Classification.model_validate({"tipo": label, "confianza": "alta"}).document_type
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "data",
+    [{"confianza": "alta"}, {"tipo": None, "confianza": "alta"}, {"tipo": 3, "confianza": "alta"}],
+)
+def test_missing_or_non_text_type_is_still_rejected(data):
     with pytest.raises(ValidationError):
-        Classification.model_validate({"tipo": "contrato", "confianza": "alta"})
+        Classification.model_validate(data)
+
+
+def test_otro_is_not_a_document_type_label():
+    from app.schemas.helpers import DOCUMENT_TYPE_ES
+
+    assert "otro" not in DOCUMENT_TYPE_ES
 
 
 def test_english_names_are_also_accepted():
