@@ -3,7 +3,7 @@ import type { Confidence, DocumentType } from '../api/types';
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   policy: 'Póliza',
   invoice: 'Factura',
-  other: 'Otro',
+  unknown: 'Desconocido',
 };
 
 export const CONFIDENCE_LABELS: Record<Confidence, string> = {
@@ -36,11 +36,6 @@ const FIELD_LABELS: Record<string, string> = {
   holder: 'Titular',
   tax_id: 'NIF',
   license_plate: 'Matrícula',
-  title: 'Título',
-  document_date: 'Fecha',
-  issuer: 'Emisor',
-  entities: 'Entidades',
-  summary: 'Resumen',
 };
 
 export function documentTypeLabel(type: DocumentType | null): string {
