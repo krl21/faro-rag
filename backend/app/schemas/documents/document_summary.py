@@ -15,7 +15,8 @@ class DocumentSummary(BaseModel):
         id: Document identifier.
         filename: Original filename.
         status: ``pending``, ``processing``, ``done`` or ``failed``.
-        document_type: ``policy``, ``invoice``, ``other`` or ``None`` if unknown.
+        document_type: ``policy``, ``invoice``, ``unknown`` (neither of them) or
+            ``None`` if the classification failed.
         page_count: Number of pages, once extracted.
         size_bytes: File size.
         error: Processing error, if any.
