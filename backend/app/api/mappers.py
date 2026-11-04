@@ -1,7 +1,8 @@
 """Convert ORM objects into API response models."""
 
-from app.ai.extraction.field_specs import find_spec
+from app.ai.extraction.specs import find_spec
 from app.db.models import Conversation, Document, ExtractedField
+from app.domain.dtos import ChatResult
 from app.schemas.ask import AskResponse
 from app.schemas.conversations import ConversationDetail, ConversationMessage
 from app.schemas.documents import (
@@ -10,7 +11,6 @@ from app.schemas.documents import (
     DocumentSummary,
     ExtractedFieldOut,
 )
-from app.services.chat_service import ChatResult
 
 
 def _error(document: Document) -> DocumentError | None:
