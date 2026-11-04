@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from app.domain.dtos.filter_columns import FilterColumns
+
 
 @dataclass(frozen=True)
 class FieldDraft:
@@ -16,6 +18,8 @@ class FieldDraft:
         error: Explicit error when ``status`` is ``failed``.
         attempts: Number of LLM calls made for this field.
         page: 1-based page where the value was found, when the LLM reports it.
+        filter_columns: Typed, normalized value for the chat filters (only for
+            filterable fields with a value).
     """
 
     name: str
@@ -25,3 +29,4 @@ class FieldDraft:
     error: str | None
     attempts: int
     page: int | None = None
+    filter_columns: FilterColumns | None = None
