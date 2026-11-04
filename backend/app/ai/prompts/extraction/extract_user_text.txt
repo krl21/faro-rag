@@ -1,0 +1,5 @@
+Extrae los campos del documento.
+
+<documento>
+$text
+</documento>
