@@ -15,11 +15,6 @@ import { isActiveStatus } from '../lib/polling';
 import { validatePdf } from '../lib/validatePdf';
 import styles from './Page.module.css';
 
-interface Notice {
-  tone: 'info' | 'danger';
-  text: string;
-}
-
 function countStats(documents: DocumentSummary[]) {
   return {
     total: documents.length,
@@ -37,7 +32,8 @@ export function DocumentsPage({ onOpenDocument }: DocumentsPageProps) {
   const documents = useDocuments();
   const upload = useUploadDocument();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [notice, setNotice] = useState<Notice | null>(null);
+  /** Upload alert (rejected file, duplicate or API error); always shown in red. */
+  const [notice, setNotice] = useState<string | null>(null);
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,24 +42,19 @@ export function DocumentsPage({ onOpenDocument }: DocumentsPageProps) {
 
     const invalid = validatePdf(file, config.maxUploadBytes);
     if (invalid) {
-      setNotice({ tone: 'danger', text: invalid });
+      setNotice(invalid);
       return;
     }
     setNotice(null);
     upload.mutate(file, {
       onSuccess: (result) => {
         if (result.duplicate) {
-          setNotice({
-            tone: 'info',
-            text: `«${file.name}» ya estaba subido (mismo contenido). Se usa el documento existente.`,
-          });
+          setNotice(
+            `«${file.name}» ya está almacenado (mismo contenido). Se usa el documento existente.`,
+          );
         }
       },
-      onError: (error) =>
-        setNotice({
-          tone: 'danger',
-          text: `No se pudo subir «${file.name}». ${errorMessage(error)}`,
-        }),
+      onError: (error) => setNotice(`No se pudo subir «${file.name}». ${errorMessage(error)}`),
     });
   };
 
@@ -97,8 +88,8 @@ export function DocumentsPage({ onOpenDocument }: DocumentsPageProps) {
       />
 
       {notice && (
-        <Banner tone={notice.tone} onClose={() => setNotice(null)}>
-          {notice.text}
+        <Banner tone="danger" onClose={() => setNotice(null)}>
+          {notice}
         </Banner>
       )}
       {documents.isError && (
