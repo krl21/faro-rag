@@ -1,8 +1,12 @@
+"""Typed filter columns computed for each extracted field."""
+
 from datetime import date
 from decimal import Decimal
 
-from app.ai.extraction.field_indexing import build_field_values
-from app.domain.dtos import FieldDraft, FieldValueDraft
+import pytest
+
+from app.ai.extraction.field_indexing import filter_columns, with_filter_columns
+from app.domain.dtos import FieldDraft, FilterColumns
 
 
 def _field(name, value, status="ok"):
@@ -11,67 +15,69 @@ def _field(name, value, status="ok"):
     )
 
 
-def test_every_filterable_field_is_indexed():
-    rows = build_field_values(
-        [
-            _field("policy_number", "FS-2024-001"),
-            _field("tax_id", "b12345678"),
-            _field("license_plate", "1234 bcd"),
-            _field("holder", "Juan Pérez García"),
-            _field("issuer", "Taller El Faro, S.L."),
-            _field("invoice_amount", {"amount": "1250.50", "currency": "EUR"}),
-            _field("invoice_date", "2025-03-15"),
-            _field("document_date", "2025-01-02"),
-            _field("validity", {"start": "2025-01-01", "end": "2025-12-31"}),
-        ]
+@pytest.mark.parametrize(
+    ("name", "value", "expected"),
+    [
+        ("policy_number", "FS-2024-001", FilterColumns(text_value="FS2024001")),
+        ("tax_id", "b12345678", FilterColumns(text_value="B12345678")),
+        ("license_plate", "1234 bcd", FilterColumns(text_value="1234BCD")),
+        ("holder", "Juan Pérez García", FilterColumns(text_value="JUAN PEREZ GARCIA")),
+        (
+            "invoice_amount",
+            {"amount": "1250.50", "currency": "EUR"},
+            FilterColumns(number_value=Decimal("1250.50"), currency="EUR"),
+        ),
+        (
+            "invoice_date",
+            "2025-03-15",
+            FilterColumns(date_from=date(2025, 3, 15), date_to=date(2025, 3, 15)),
+        ),
+        (
+            "validity",
+            {"start": "2025-01-01", "end": "2025-12-31"},
+            FilterColumns(date_from=date(2025, 1, 1), date_to=date(2025, 12, 31)),
+        ),
+    ],
+)
+def test_filterable_fields_get_their_typed_columns(name, value, expected):
+    assert filter_columns(_field(name, value)) == expected
+
+
+def test_edited_fields_are_filterable_too():
+    assert filter_columns(_field("policy_number", "FS-9", status="edited")) == FilterColumns(
+        text_value="FS9"
     )
-    assert rows == [
-        FieldValueDraft(field_name="policy_number", text_value="FS2024001"),
-        FieldValueDraft(field_name="tax_id", text_value="B12345678"),
-        FieldValueDraft(field_name="license_plate", text_value="1234BCD"),
-        FieldValueDraft(field_name="holder", text_value="JUAN PEREZ GARCIA"),
-        FieldValueDraft(field_name="issuer", text_value="TALLER EL FARO S L"),
-        FieldValueDraft(
-            field_name="invoice_amount", number_value=Decimal("1250.50"), currency="EUR"
-        ),
-        FieldValueDraft(
-            field_name="invoice_date", date_from=date(2025, 3, 15), date_to=date(2025, 3, 15)
-        ),
-        FieldValueDraft(
-            field_name="document_date", date_from=date(2025, 1, 2), date_to=date(2025, 1, 2)
-        ),
-        FieldValueDraft(
-            field_name="validity", date_from=date(2025, 1, 1), date_to=date(2025, 12, 31)
-        ),
-    ]
 
 
-def test_not_found_failed_and_non_filterable_fields_are_skipped():
-    rows = build_field_values(
-        [
-            _field("policy_number", None, status="not_found"),
-            _field("tax_id", None, status="failed"),
-            _field("coverages", ["Robo"]),
-            _field("summary", "Resumen"),
-            _field("document_type", "policy"),
-        ]
-    )
-    assert rows == []
+@pytest.mark.parametrize(
+    "field",
+    [
+        _field("policy_number", None, status="not_found"),
+        _field("tax_id", "B1", status="failed"),
+        _field("coverages", ["Robo"]),
+        _field("document_type", "policy"),
+    ],
+)
+def test_fields_without_filter_columns(field):
+    assert filter_columns(field) is None
 
 
-def test_list_values_yield_one_row_each():
-    rows = build_field_values([_field("holder", ["Ana", "Luis"])])
-    assert [r.text_value for r in rows] == ["ANA", "LUIS"]
+def test_list_values_are_not_indexed(caplog):
+    assert filter_columns(_field("holder", ["Ana", "Luis"])) is None
+    assert "field value not indexed" in caplog.text
 
 
 def test_malformed_value_is_skipped_with_a_warning(caplog):
-    rows = build_field_values(
-        [_field("invoice_date", "no es fecha"), _field("policy_number", "FS-1")]
-    )
-    assert [r.field_name for r in rows] == ["policy_number"]
+    assert filter_columns(_field("invoice_date", "no es fecha")) is None
     assert "field value not indexed" in caplog.text
 
 
 def test_long_text_is_truncated():
-    (row,) = build_field_values([_field("holder", "A" * 400)])
-    assert len(row.text_value) == 255
+    assert len(filter_columns(_field("holder", "A" * 400)).text_value) == 255
+
+
+def test_with_filter_columns_keeps_every_field():
+    fields = with_filter_columns([_field("policy_number", "FS-1"), _field("coverages", ["Robo"])])
+    assert [f.name for f in fields] == ["policy_number", "coverages"]
+    assert fields[0].filter_columns == FilterColumns(text_value="FS1")
+    assert fields[1].filter_columns is None
