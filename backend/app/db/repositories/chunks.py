@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Chunk, Document
 from app.domain.dtos import ChunkDraft, PageRange, ScoredChunk
+from app.domain.enums import DocumentType
 
 # Same text search configuration used by the generated ``tsv`` column.
 TS_CONFIG = "spanish"
@@ -138,6 +139,8 @@ class ChunkRepository:
         Returns:
             The restricted query.
         """
+        # The chat only works with policies and invoices.
+        stmt = stmt.where(Document.document_type.is_distinct_from(DocumentType.OTHER.value))
         if document_ids is not None:
             stmt = stmt.where(Chunk.document_id.in_(list(document_ids)))
         if pages is not None and pages.start is not None:
