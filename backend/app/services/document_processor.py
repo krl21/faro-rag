@@ -6,7 +6,7 @@ import uuid
 from opentelemetry import trace
 
 from app.ai.extraction.field_extractor import FieldExtractor
-from app.ai.extraction.field_indexing import build_field_values
+from app.ai.extraction.field_indexing import with_filter_columns
 from app.ai.extraction.prompts import pages_to_text
 from app.ai.ingestion.chunker import chunk_pages
 from app.ai.ingestion.embedder import embed_texts
@@ -20,7 +20,6 @@ from app.db.repositories import (
     ChunkRepository,
     DocumentRepository,
     FieldRepository,
-    FieldValueRepository,
 )
 from app.db.session import session_scope
 from app.domain.dtos import ChunkDraft, LLMDocument, ProcessingOutcome
@@ -33,7 +32,7 @@ logger = logging.getLogger(__name__)
 class DocumentProcessor:
     """Extract the text, classify, and chunk, embed and extract fields for a document.
 
-    Classification comes first: documents of type ``other`` stop there (no
+    Classification comes first: documents of type ``unknown`` stop there (no
     chunks, no embeddings, no fields) because the chat only uses policies and
     invoices.
 
@@ -211,7 +210,7 @@ class DocumentProcessor:
 
         # Neither a policy nor an invoice: the chat never uses it, so no chunks,
         # no embeddings and no field extraction (saves the embedding and LLM cost).
-        if document_type is DocumentType.OTHER:
+        if document_type is DocumentType.UNKNOWN:
             logger.info(
                 "document is neither a policy nor an invoice: chunks and fields skipped",
                 extra=fields(document_id=doc_id),
@@ -321,13 +320,14 @@ class DocumentProcessor:
                     for c, v in zip(chunks, vectors, strict=True)
                 ],
             )
-            FieldRepository(session).replace_for_document(document_id, drafts)
-            index_rows = build_field_values(drafts)
-            FieldValueRepository(session).replace_for_document(document_id, index_rows)
+            # Each field row also stores its typed filter columns (same transaction).
+            stored_fields = with_filter_columns(drafts)
+            FieldRepository(session).replace_for_document(document_id, stored_fields)
+            filterable = sum(1 for f in stored_fields if f.filter_columns)
             stored.page_count = page_count
             stored.document_type = document_type.value if document_type else None
             documents.set_status(stored, DocumentStatus.DONE)
-            out.update(chunks=len(chunks), fields=len(drafts), index_rows=len(index_rows))
+            out.update(chunks=len(chunks), fields=len(drafts), filterable_fields=filterable)
 
         trace.get_current_span().set_attribute("chunks.count", len(chunks))
         logger.info(
