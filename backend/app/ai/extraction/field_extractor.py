@@ -66,7 +66,7 @@ class FieldExtractor:
     def run(self, document: LLMDocument) -> ExtractionResult:
         """Classify the document and extract the fields of its type.
 
-        Documents classified as ``other`` get no field extraction (no second
+        Documents classified as ``unknown`` get no field extraction (no second
         LLM call): only policies and invoices have fields.
 
         Args:
@@ -111,7 +111,7 @@ class FieldExtractor:
 
         Returns:
             One draft per field of the type; empty, without calling the LLM,
-            for types without fields (``other``).
+            for types without fields (``unknown``).
 
         Raises:
             ProviderError: If the LLM provider fails.
