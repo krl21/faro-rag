@@ -1,0 +1,71 @@
+.wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 12px 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid var(--color-row-divider);
+}
+
+.table td {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--color-row-divider);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.open {
+  display: block;
+  min-height: var(--control-height);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.open:hover .filename {
+  color: var(--color-accent);
+}
+
+.filename {
+  display: block;
+  padding-top: 11px;
+  overflow-wrap: anywhere;
+}
+
+/* Line under the filename: failure reason or out-of-scope note. */
+.subline {
+  display: block;
+  padding-bottom: 8px;
+  font-size: var(--font-size-label);
+  font-weight: 500;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.note {
+  color: var(--color-text-secondary);
+}
+
+.muted {
+  color: var(--color-text-secondary);
+}
