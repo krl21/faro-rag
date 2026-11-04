@@ -2,7 +2,6 @@
 .env
 .env.*
 !.env.example
-!.env.template
 
 # --- Python ---
 __pycache__/
@@ -12,6 +11,8 @@ __pycache__/
 build/
 dist/
 .venv/
+# uv and Python installed inside the project for the optional local env
+.tools/
 venv/
 env/
 .python-version
@@ -53,3 +54,8 @@ Thumbs.db
 # --- Editores ---
 .idea/
 .vscode/
+
+# Datos locales
+uploads/
+samples/pdfs/
+samples/questions.json
