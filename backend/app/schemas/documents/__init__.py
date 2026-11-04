@@ -1,4 +1,4 @@
-"""Response models for the ``/documents`` endpoints.
+"""Request and response models for the ``/documents`` endpoints.
 
 One module per class; this package re-exports the public names.
 """
@@ -8,6 +8,7 @@ from app.schemas.documents.document_error import DocumentError
 from app.schemas.documents.document_summary import DocumentSummary
 from app.schemas.documents.document_upload_response import DocumentUploadResponse
 from app.schemas.documents.extracted_field_out import ExtractedFieldOut
+from app.schemas.documents.field_update_request import FieldUpdateRequest
 
 __all__ = [
     "DocumentDetail",
@@ -15,4 +16,5 @@ __all__ = [
     "DocumentSummary",
     "DocumentUploadResponse",
     "ExtractedFieldOut",
+    "FieldUpdateRequest",
 ]
