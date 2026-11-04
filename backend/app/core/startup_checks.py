@@ -6,9 +6,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from app.ai.providers.base import EmbeddingProvider
-from app.config import LLMProviderName, Settings
+from app.config import Settings
 from app.db.repositories import ChunkRepository
-from app.domain.enums import DocumentInput
+from app.domain.enums import DocumentInput, LLMProviderName
 
 logger = logging.getLogger(__name__)
 
