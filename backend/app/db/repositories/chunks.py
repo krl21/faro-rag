@@ -3,11 +3,11 @@
 import uuid
 from collections.abc import Sequence
 
-from sqlalchemy import delete, func, literal_column, select, text
+from sqlalchemy import Select, delete, func, literal_column, select, text
 from sqlalchemy.orm import Session
 
 from app.db.models import Chunk, Document
-from app.domain.dtos import ChunkDraft, ScoredChunk
+from app.domain.dtos import ChunkDraft, PageRange, ScoredChunk
 
 # Same text search configuration used by the generated ``tsv`` column.
 TS_CONFIG = "spanish"
@@ -69,6 +69,7 @@ class ChunkRepository:
         embedding: Sequence[float],
         limit: int,
         document_ids: Sequence[uuid.UUID] | None = None,
+        pages: PageRange | None = None,
     ) -> list[ScoredChunk]:
         """Find the chunks closest to an embedding by cosine similarity.
 
@@ -76,6 +77,7 @@ class ChunkRepository:
             embedding: Query embedding.
             limit: Maximum number of results.
             document_ids: Restrict the search to these documents (``None``: all).
+            pages: Restrict the search to these pages (``None``: all).
 
         Returns:
             Chunks ordered by decreasing similarity.
@@ -87,8 +89,7 @@ class ChunkRepository:
             .order_by(distance)
             .limit(limit)
         )
-        if document_ids is not None:
-            stmt = stmt.where(Chunk.document_id.in_(list(document_ids)))
+        stmt = self._restrict(stmt, document_ids, pages)
         return [self._to_scored(row) for row in self._session.execute(stmt)]
 
     def fulltext_search(
@@ -96,6 +97,7 @@ class ChunkRepository:
         query: str,
         limit: int,
         document_ids: Sequence[uuid.UUID] | None = None,
+        pages: PageRange | None = None,
     ) -> list[ScoredChunk]:
         """Find chunks matching a query with PostgreSQL full-text search.
 
@@ -105,6 +107,7 @@ class ChunkRepository:
             query: Natural-language query.
             limit: Maximum number of results.
             document_ids: Restrict the search to these documents (``None``: all).
+            pages: Restrict the search to these pages (``None``: all).
 
         Returns:
             Matching chunks ordered by decreasing ``ts_rank``.
@@ -118,9 +121,30 @@ class ChunkRepository:
             .order_by(rank.desc())
             .limit(limit)
         )
+        stmt = self._restrict(stmt, document_ids, pages)
+        return [self._to_scored(row) for row in self._session.execute(stmt)]
+
+    @staticmethod
+    def _restrict(
+        stmt: Select, document_ids: Sequence[uuid.UUID] | None, pages: PageRange | None
+    ) -> Select:
+        """Limit a chunk search to some documents and pages.
+
+        Args:
+            stmt: Search query.
+            document_ids: Documents to search in, or ``None`` for all.
+            pages: Inclusive page range, or ``None`` for all pages.
+
+        Returns:
+            The restricted query.
+        """
         if document_ids is not None:
             stmt = stmt.where(Chunk.document_id.in_(list(document_ids)))
-        return [self._to_scored(row) for row in self._session.execute(stmt)]
+        if pages is not None and pages.start is not None:
+            stmt = stmt.where(Chunk.page >= pages.start)
+        if pages is not None and pages.end is not None:
+            stmt = stmt.where(Chunk.page <= pages.end)
+        return stmt
 
     def embedding_column_dimension(self) -> int | None:
         """Read the dimension of the ``chunks.embedding`` column from the catalog.
