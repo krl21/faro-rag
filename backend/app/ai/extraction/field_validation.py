@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from app.ai.extraction.field_specs import FieldSpec
+from app.ai.extraction.specs import FieldSpec
 from app.domain.dtos import FieldDraft
 from app.domain.enums import FieldStatus
 
