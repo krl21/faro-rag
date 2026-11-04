@@ -140,7 +140,7 @@ class ChunkRepository:
             The restricted query.
         """
         # The chat only works with policies and invoices.
-        stmt = stmt.where(Document.document_type.is_distinct_from(DocumentType.OTHER.value))
+        stmt = stmt.where(Document.document_type.is_distinct_from(DocumentType.UNKNOWN.value))
         if document_ids is not None:
             stmt = stmt.where(Chunk.document_id.in_(list(document_ids)))
         if pages is not None and pages.start is not None:
