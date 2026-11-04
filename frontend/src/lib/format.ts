@@ -24,3 +24,8 @@ export function formatMoney(amount: string | number, currency: string): string {
     return `${value.toLocaleString(LOCALE)} ${currency}`;
   }
 }
+
+/** `3` -> `pág. 3`, the usual Spanish abbreviation. */
+export function formatPage(page: number): string {
+  return `pág. ${page}`;
+}
