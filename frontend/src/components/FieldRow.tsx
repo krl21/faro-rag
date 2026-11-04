@@ -3,7 +3,8 @@ import type { ExtractedField, FieldValue } from '../api/types';
 import { useUpdateField } from '../hooks/useUpdateField';
 import { errorMessage } from '../lib/errorMessages';
 import { fieldDisplayStatus } from '../lib/fieldState';
-import { formatFieldValue } from '../lib/fieldValue';
+import { formatFieldValue, INVALID_VALUE_REASONS } from '../lib/fieldValue';
+import { formatPage } from '../lib/format';
 import { CONFIDENCE_LABELS, fieldLabel } from '../lib/labels';
 import { STATUS_APPEARANCE } from '../lib/statusAppearance';
 import { Button } from './Button';
@@ -17,19 +18,22 @@ interface FieldRowProps {
   field: ExtractedField;
 }
 
-/** `p. 1 · Confianza alta`: only the parts the API sends. */
+/** `pág. 1 · Confianza alta`: only the parts the API sends. */
 function sourceText(field: ExtractedField): string {
   const parts = [];
-  if (field.page) parts.push(`p. ${field.page}`);
+  if (field.page) parts.push(formatPage(field.page));
   if (field.confidence) parts.push(CONFIDENCE_LABELS[field.confidence]);
   return parts.join(' · ');
 }
 
-/** `attempts` counts every LLM call: the first one is not a retry. */
+/**
+ * `attempts` counts every LLM call: the first one is not a retry. The reason
+ * comes from the value type: the API `error` is technical and in English.
+ */
 function failureText(field: ExtractedField): string {
   const retries = Math.max(field.attempts - 1, 0);
-  const prefix = `Validación fallida tras ${retries} ${retries === 1 ? 'reintento' : 'reintentos'}`;
-  return field.error ? `${prefix}: ${field.error}` : prefix;
+  const times = `${retries} ${retries === 1 ? 'reintento' : 'reintentos'}`;
+  return `Validación fallida tras ${times}: ${INVALID_VALUE_REASONS[field.value_type]}`;
 }
 
 /** Note under the value for the statuses that need one. */
