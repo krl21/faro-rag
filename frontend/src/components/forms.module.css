@@ -1,0 +1,38 @@
+/* Shared look of every input, select and textarea. */
+.control {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 10px 14px;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.control::placeholder {
+  color: var(--color-text-muted);
+}
+
+.control:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+textarea.control {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
