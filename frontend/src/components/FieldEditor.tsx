@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import type { FieldValue, FieldValueType } from '../api/types';
-import { EDITOR_INPUTS, fromDraft, toDraft, type EditorInput } from '../lib/fieldValue';
+import { draftError, EDITOR_INPUTS, fromDraft, toDraft, type EditorInput } from '../lib/fieldValue';
 import { Button } from './Button';
 import styles from './FieldEditor.module.css';
 import forms from './forms.module.css';
@@ -47,7 +47,10 @@ export function FieldEditor({
   onCancel,
 }: FieldEditorProps) {
   const [draft, setDraft] = useState(() => toDraft(value, type));
-  const parsed = fromDraft(draft, type);
+  const problem = draftError(draft, type);
+  const parsed = problem ? null : fromDraft(draft, type);
+  // The API error is from the last save; the local problem is about what is typed now.
+  const message = problem ?? error;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -71,9 +74,9 @@ export function FieldEditor({
           </label>
         ))}
       </div>
-      {error && (
+      {message && (
         <p className={styles.error} role="alert">
-          {error}
+          {message}
         </p>
       )}
       <div className={styles.actions}>
