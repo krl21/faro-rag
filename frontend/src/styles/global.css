@@ -1,0 +1,108 @@
+/* Design tokens: every color of the UI comes from here. */
+:root {
+  --color-page: #0f1720;
+  --color-sidebar: #0a1118;
+  --color-sidebar-border: #1c2733;
+  --color-surface: #16212c;
+  --color-input-border: #2a3846;
+  --color-row-divider: #22303d;
+  --color-text: #e6edf3;
+  --color-text-secondary: #9aa8b6;
+  --color-text-muted: #8593a2;
+  --color-accent: #5ee0cb;
+  --color-on-accent: #06221d;
+  --color-nav-active: #14303a;
+  --color-user-bubble: #1f3a46;
+
+  /* Status colors: only where they inform of something */
+  --color-success: #6ee7a8;
+  --color-info: #7cb8ff;
+  --color-neutral: #c3ccd6;
+  --color-warning: #f5c26b;
+  --color-danger: #ff8a80;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --control-height: 44px;
+
+  --font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-size-title: 26px;
+  --font-size-body: 14px;
+  --font-size-small: 13px;
+  --font-size-label: 12px;
+
+  color-scheme: dark;
+}
+
+/*
+ * Tones: a component sets `data-tone` and uses `var(--tone)`. Badges, stat
+ * cards, banners and field rows share these instead of repeating colors.
+ */
+[data-tone='success'] {
+  --tone: var(--color-success);
+}
+[data-tone='info'] {
+  --tone: var(--color-info);
+}
+[data-tone='neutral'] {
+  --tone: var(--color-neutral);
+}
+[data-tone='warning'] {
+  --tone: var(--color-warning);
+}
+[data-tone='danger'] {
+  --tone: var(--color-danger);
+}
+[data-tone='plain'] {
+  --tone: var(--color-text);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Hidden but read by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
