@@ -65,7 +65,7 @@ FIELD_SPECS: dict[DocumentType, tuple[FieldSpec, ...]] = {
     ),
     # Documents that are neither a policy nor an invoice are not used by the chat:
     # no fields, no chunks.
-    DocumentType.OTHER: (),
+    DocumentType.UNKNOWN: (),
 }
 """Fields extracted per document type, in display order."""
 
