@@ -51,8 +51,10 @@ def test_unknown_provider_is_rejected_by_settings():
         Settings(llm_provider="openai-directo")
 
 
-def test_pypdf_is_the_default_extractor():
-    assert isinstance(build_pdf_extractor(Settings()), PypdfExtractor)
+def test_pypdf_is_the_default_extractor(monkeypatch):
+    # Independent of the developer's .env or shell (PDF_EXTRACTOR may be set there).
+    monkeypatch.delenv("PDF_EXTRACTOR", raising=False)
+    assert isinstance(build_pdf_extractor(Settings(_env_file=None)), PypdfExtractor)
 
 
 @pytest.mark.skipif(HAS_ST, reason="sentence-transformers is installed in this image")
