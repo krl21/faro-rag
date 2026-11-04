@@ -1,4 +1,4 @@
-import { formatFieldValue, fromDraft, toDraft } from '../../lib/fieldValue';
+import { draftError, formatFieldValue, fromDraft, toDraft } from '../../lib/fieldValue';
 import { fieldDisplayStatus } from '../../lib/fieldState';
 import { makeField } from '../../test/fixtures';
 
@@ -25,6 +25,13 @@ describe('field values', () => {
   it('returns null while a required input is empty', () => {
     expect(fromDraft(toDraft(null, 'period'), 'period')).toBeNull();
     expect(fromDraft({ start: '2024-01-01', end: '' }, 'period')).toBeNull();
+  });
+
+  it('explains the usual mistakes before saving', () => {
+    expect(draftError({ start: '2024-12-31', end: '2024-01-01' }, 'period')).toMatch(/fin/);
+    expect(draftError({ amount: '-5', currency: 'EUR' }, 'money')).toMatch(/importe/);
+    expect(draftError({ amount: '5', currency: 'EURO' }, 'money')).toMatch(/moneda/);
+    expect(draftError({ amount: '5', currency: 'eur' }, 'money')).toBeNull();
   });
 
   it('marks valid low-confidence values for review', () => {
