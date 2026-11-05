@@ -57,7 +57,7 @@ def format_field_fact(number: int, fact: FieldFact) -> str:
         number=number,
         filename=escape(sanitize_untrusted(fact.filename), quote=True),
         page=fact.page if fact.page is not None else "",
-        label=fact.label,
+        label=sanitize_untrusted(fact.label),  # Free data: label written in the document.
         value=sanitize_untrusted(fact.value),
         edited_note=" (corregido por el usuario)" if fact.edited else "",
     )
