@@ -134,6 +134,45 @@ class FieldEditService:
             )
             return field, document.document_type
 
+    def delete(self, document_id: uuid.UUID, name: str) -> None:
+        """Delete a fixed field of a document.
+
+        The row is removed: the field disappears from the field list and the
+        chat filters and answers stop using it. ``PATCH`` can fill it in again
+        later. Reprocessing the document extracts it again. ``document_type``
+        can be neither edited nor deleted (it decides which fields apply).
+
+        Args:
+            document_id: Document identifier.
+            name: Field name (for example ``policy_number``).
+
+        Raises:
+            DocumentNotFoundError: If the document does not exist.
+            DocumentNotReadyError: If the document is not ``done``.
+            FieldNotFoundError: If the document has no field with that name, or
+                it is ``document_type``.
+        """
+        with get_tracer().start_as_current_span("fields.delete") as span:
+            span.set_attribute("document.id", str(document_id))
+            span.set_attribute("field.name", name)
+            document = self._documents.get(document_id)
+            if document is None:
+                raise DocumentNotFoundError(f"Document {document_id} not found")
+            if document.status != DocumentStatus.DONE:
+                raise DocumentNotReadyError(
+                    f"Document {document_id} is {document.status}; fields can only be "
+                    "deleted once it is processed"
+                )
+            field = self._fields.get(document_id, name)
+            # Same rule as PATCH: only the fields of the document type (not document_type).
+            if field is None or find_spec(document.document_type, name) is None:
+                raise FieldNotFoundError(f"Document {document_id} has no deletable field {name!r}")
+            self._fields.delete(field)
+            self._session.commit()
+            logger.info(
+                "field deleted by the user", extra=fields(document_id=str(document_id), field=name)
+            )
+
     @staticmethod
     def _validated(spec: FieldSpec, value: Any) -> Any:
         """Validate a user value and return it in its JSON form.
@@ -171,7 +210,11 @@ class FieldEditService:
             The new, unsaved field.
         """
         field = ExtractedField(
-            document_id=document_id, name=name, status=FieldStatus.NOT_FOUND, attempts=0
+            document_id=document_id,
+            label=name,
+            is_predefined=True,
+            status=FieldStatus.NOT_FOUND,
+            attempts=0,
         )
         self._session.add(field)
         return field
