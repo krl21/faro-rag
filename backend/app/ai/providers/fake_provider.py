@@ -1,14 +1,12 @@
 """Deterministic fake providers for development and tests (no network calls)."""
 
 import hashlib
-import io
 import math
 import re
 import unicodedata
 from collections.abc import Callable, Mapping, Sequence
 
-from pypdf import PdfReader
-
+from app.ai.ingestion.pdf_pages import read_text_layer
 from app.ai.providers import fake_responses
 from app.ai.providers.types import Attachment, ChatMessage, LLMResponse
 
@@ -36,10 +34,9 @@ def _attachment_text(attachments: Sequence[Attachment]) -> str:
     texts = []
     for attachment in attachments:
         if attachment.mime_type == "application/pdf":
-            reader = PdfReader(io.BytesIO(attachment.data))
             texts.extend(
-                f"[Página {number}]\n{page.extract_text() or ''}"
-                for number, page in enumerate(reader.pages, start=1)
+                f"[Página {number}]\n{text}"
+                for number, text in enumerate(read_text_layer(attachment.data), start=1)
             )
     return "\n\n".join(texts)
 
