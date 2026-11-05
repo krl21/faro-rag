@@ -50,6 +50,8 @@ class Answerer:
         search_text: str | None = None,
         pages: PageRange | None = None,
         facts: Sequence[FieldFact] = (),
+        *,
+        search_facts: bool = False,
     ) -> AnswerResult:
         """Answer a question with citations.
 
@@ -67,6 +69,9 @@ class Answerer:
                 citable sources before the fragments (questions about one
                 document). They answer questions such as "¿la factura es de
                 2003?" even when no text fragment is similar enough.
+            search_facts: Also search the free label-value data of the
+                documents (general chat): they compete with the chunks for
+                the same places, and the ones selected are added to ``facts``.
 
         Returns:
             The answer with its citations, or the "not enough information"
@@ -80,13 +85,13 @@ class Answerer:
                 span.set_attribute("rag.document_filter_count", len(document_ids))
             if pages is not None:
                 span.set_attribute("rag.pages", f"{pages.start or ''}-{pages.end or ''}")
-
-            print("---> estoy aquí ...")
-
-            fragments = self._retriever.retrieve(search_text or question, document_ids, pages)
-
-            print(f"---> fragmentos del recuperador: {fragments}")
-
+            if search_facts:
+                fragments, found_facts = self._retriever.retrieve_sources(
+                    search_text or question, document_ids, pages
+                )
+                facts = [*facts, *found_facts]
+            else:
+                fragments = self._retriever.retrieve(search_text or question, document_ids, pages)
             span.set_attribute("rag.fragments", len(fragments))
             span.set_attribute("rag.facts", len(facts))
             if not fragments and not facts:
@@ -117,9 +122,7 @@ class Answerer:
             ]
             logger.info(
                 "answer generated",
-                extra=fields(
-                    fragments=len(fragments), facts=len(facts), citations=len(citations)
-                ),
+                extra=fields(fragments=len(fragments), facts=len(facts), citations=len(citations)),
             )
             return AnswerResult(answer=checked.text, answered=True, citations=citations)
 
