@@ -17,9 +17,13 @@ class LLMDocument:
             ``[Página n]`` marker.
         page_count: Pages of the PDF; a page reported by the LLM beyond it
             is discarded.
+        facts: Label-value data found in its tables and lines, one per line
+            with its page (``[Página 1] TOTAL FACTURA: 40.492,65 €``). Given to
+            the field extraction as a hint, so no value is overlooked.
     """
 
     pdf: bytes
     filename: str
     text: str
     page_count: int
+    facts: str = ""
