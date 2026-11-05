@@ -27,12 +27,15 @@ The chat works in Spanish: documents, questions and answers are in Spanish.
   - [9. Observability](#9-observability)
   - [10. Security](#10-security)
   - [11. Tests and CI](#11-tests-and-ci)
-  - [12. Sample dataset and demo](#12-sample-dataset-and-demo)
-  - [13. Sample traces](#13-sample-traces)
-  - [14. What is done](#14-what-is-done)
-  - [15. What is not done](#15-what-is-not-done)
-  - [16. Known limitations](#16-known-limitations)
-  - [17. Further documentation](#17-further-documentation)
+  - [12. Development](#12-development)
+    - [Backend](#backend)
+    - [Frontend](#frontend)
+  - [13. Sample dataset and demo](#13-sample-dataset-and-demo)
+  - [14. Sample traces](#14-sample-traces)
+  - [15. What is done](#15-what-is-done)
+  - [16. What is not done](#16-what-is-not-done)
+  - [17. Known limitations](#17-known-limitations)
+  - [18. Further documentation](#18-further-documentation)
 
 ## 1. Requirements
 
@@ -240,7 +243,7 @@ Every variable is described in [`.env.example`](.env.example). The main ones:
 - **Custom spans**: `queue.enqueue`, `ingest.extract_text`, `extract.classify`, `ingest.chunk`, `ingest.embed`, `extract.fields`, `chat.ask_document`, `rag.answer`, `llm.complete`, `embedding.embed`, `fields.edit`, `facts.edit`…
 - **Attributes**: `document.id`, `document.type`, `pdf.pages`, `chunks.count`, `fields.count`, `rag.fragments`, `rag.facts`, `rag.citations`, `rag.answered`, `llm.purpose`, `llm.latency_ms`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.request.model`… Traces store no document text, questions or keys.
 - **Logs** in JSON, one line per step, with `trace_id` and `span_id`. `INFO`: ids, counters and durations; `DEBUG`: also the content (questions, text, LLM answers). Never PDF bytes or keys.
-- **Viewer**: Jaeger at <http://localhost:16686>. Exported examples in [`trace-samples/`](#13-sample-traces).
+- **Viewer**: Jaeger at <http://localhost:16686>. Exported examples in [`trace-samples/`](#14-sample-traces).
 
 ## 10. Security
 
@@ -271,7 +274,52 @@ make lint-web     # frontend: tsc, ESLint and Prettier
   - **Backend**: builds the test image and, with the same Compose `tests` service as `make test` (PostgreSQL with pgvector, Redis, fake providers), runs `ruff check`, `ruff format --check` and `pytest` (unit and integration).
   - **Frontend**: types, lint, format, tests and build.
 
-## 12. Sample dataset and demo
+## 12. Development
+
+### Backend
+
+```bash
+docker compose --profile test run --rm tests pytest tests/unit/test_chunker.py -v   # one file; -k <name> for one test, -s to see output
+make format       # ruff format and safe lint fixes
+make lock         # regenerate backend/uv.lock after changing pyproject.toml
+```
+
+- Integration tests share the `faro_test` database: do not run two test runs at the same time.
+- The `tests` service mounts `backend/`, so it always tests the current code without rebuilding; the image is rebuilt only when dependencies change.
+- Optional local environment for the editor (autocompletion, ruff and unit tests without Docker). Everything stays in `backend/.tools/` and `backend/.venv/`, ignored by git and outside the images:
+
+  ```bash
+  cd backend && mkdir -p .tools/bin
+  curl -LsSf https://astral.sh/uv/0.5.11/install.sh | env UV_INSTALL_DIR=.tools/bin UV_NO_MODIFY_PATH=1 sh
+  export UV_PYTHON_INSTALL_DIR=$PWD/.tools/python UV_CACHE_DIR=$PWD/.tools/cache
+  .tools/bin/uv python install 3.12
+  .tools/bin/uv sync --frozen               # dependencies + dev group, without PyTorch or Docling
+  source .venv/bin/activate && pytest tests/unit -q
+  ```
+
+  Interpreter for VS Code: `backend/.venv/bin/python`. To remove it: `rm -rf backend/.venv backend/.tools`.
+
+### Frontend
+
+```bash
+make format-web   # Prettier and safe ESLint fixes
+make lock-web     # regenerate frontend/package-lock.json after changing package.json
+```
+
+| Folder (`frontend/src/`) | Contents |
+|---|---|
+| `api/` | HTTP client, endpoints and `types/` (one type per file, mirroring the Pydantic schemas) |
+| `hooks/` | Data hooks with TanStack Query (documents, upload, field editing, health) and `useChat` |
+| `context/` | Chat state, kept when switching views |
+| `lib/` | Pure, testable logic: polling rule, Spanish error messages, PDF validation, value formatting, labels |
+| `components/`, `pages/` | UI components (CSS Modules) and the three views |
+| `styles/` | Palette tokens and status tones |
+| `test/`, `__tests__/` | Test utilities (MSW server, fixtures, render with providers) and tests |
+
+- The SPA always calls `/api/...` on its own origin: the Vite proxy forwards it in development and nginx in production, so there is no CORS and no API URL in the code.
+- Polling: `GET /documents` repeats every 3 s only while a document is `pending` or `processing`, and stops when every document is `done` or `failed`. The fields view applies the same rule to `GET /documents/{id}` (`lib/polling.ts`, TanStack Query `refetchInterval`).
+
+## 13. Sample dataset and demo
 
 `samples/` holds 5 fictitious PDFs, 27 questions with their expected answer and a script that runs them against the API.
 
@@ -302,7 +350,7 @@ docker run --rm -v "$PWD":/work -w /work python:3.12-slim sh -c '
 
 Without `--seed`, each run generates different data. The included batch was generated without a seed, so it cannot be reproduced exactly; `doc_corrupto.pdf` was created separately.
 
-## 13. Sample traces
+## 14. Sample traces
 
 `trace-samples/` holds traces exported from Jaeger during the demo.
 
@@ -322,7 +370,7 @@ Without `--seed`, each run generates different data. The included batch was gene
 
 To open them without the stack: Jaeger → *Search* → **JSON File** tab. To export another one: `curl -s localhost:16686/api/traces/<trace_id> | jq . > trace.json`.
 
-## 14. What is done
+## 15. What is done
 
 - Upload with validation, duplicate detection by content (SHA-256) and asynchronous processing with Celery and Redis, with visible statuses (`pending`, `processing`, `done`, `failed`) and coded errors.
 - Per-page text extraction with Docling, chunking with metadata (document, page), embeddings in pgvector and reprocessing without duplicates.
@@ -336,11 +384,11 @@ To open them without the stack: Jaeger → *Search* → **JSON File** tab. To ex
 - Backend (unit and integration) and frontend tests; linter and formatter configured; CI running both.
 - Sample dataset, demo script and sample traces.
 
-## 15. What is not done
+## 16. What is not done
 
 - Analyzing why three demo questions (q13, q21 and q24) do not find a value that is in the document.
 
-## 16. Known limitations
+## 17. Known limitations
 
 - No authentication.
 - Docling takes from seconds to tens of seconds per document on CPU, and the first document downloads its models. A PDF with no text, not even with OCR, fails with `no_extractable_text`.
@@ -350,6 +398,6 @@ To open them without the stack: Jaeger → *Search* → **JSON File** tab. To ex
 - Documents of unknown type are stored but not used in the chat.
 - Switching to an embedding model with another dimension requires recreating the vector columns and reprocessing.
 
-## 17. Further documentation
+## 18. Further documentation
 
 - [`DECISIONS.md`](DECISIONS.md): decisions, discarded alternatives and trade-offs (chunking and retrieval, idempotency, low-confidence fields, prompts, failures, security, use of generative AI).
