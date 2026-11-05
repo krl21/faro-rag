@@ -1,7 +1,7 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { FieldsPage } from '../../pages/FieldsPage';
-import { makeDetail, makeDocument, makeField } from '../../test/fixtures';
+import { makeDetail, makeDocument, makeFact, makeField } from '../../test/fixtures';
 import { renderWithProviders } from '../../test/render';
 import { apiUrl, server } from '../../test/server';
 
@@ -42,5 +42,22 @@ describe('FieldsPage', () => {
 
     expect(await screen.findByText(/No es una póliza ni una factura/)).toBeInTheDocument();
     expect(screen.queryByText('Tipo de documento')).not.toBeInTheDocument();
+  });
+
+  it('lists the free data of the document under the fields', async () => {
+    server.use(
+      http.get(apiUrl('/documents'), () => HttpResponse.json([makeDocument()])),
+      http.get(apiUrl('/documents/doc-1'), () =>
+        HttpResponse.json(
+          makeDetail({ facts: [makeFact({ label: 'N.º de bastidor', value: 'VF1' })] }),
+        ),
+      ),
+    );
+    renderPage('doc-1');
+
+    const section = await screen.findByRole('region', { name: 'Otros datos' });
+    expect(within(section).getByText('N.º de bastidor')).toBeInTheDocument();
+    expect(within(section).getByText('VF1')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Campos' })).toHaveTextContent('Número de póliza');
   });
 });
