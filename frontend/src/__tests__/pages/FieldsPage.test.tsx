@@ -60,4 +60,30 @@ describe('FieldsPage', () => {
     expect(within(section).getByText('VF1')).toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'Campos' })).toHaveTextContent('Número de póliza');
   });
+
+  it('offers only processed documents, including unknown ones', async () => {
+    server.use(
+      http.get(apiUrl('/documents'), () =>
+        HttpResponse.json([
+          makeDocument({ id: 'p', filename: 'en_cola.pdf', status: 'pending' }),
+          makeDocument({ id: 'r', filename: 'procesando.pdf', status: 'processing' }),
+          makeDocument({ id: 'f', filename: 'fallido.pdf', status: 'failed', document_type: null }),
+          makeDocument({ id: 'u', filename: 'menu.pdf', document_type: 'unknown' }),
+          makeDocument({ id: 'doc-1', filename: 'poliza_hogar.pdf' }),
+        ]),
+      ),
+      http.get(apiUrl('/documents/doc-1'), () => HttpResponse.json(makeDetail())),
+    );
+    renderPage(null);
+
+    const select = await screen.findByRole('combobox');
+    await within(select).findByRole('option', { name: /poliza_hogar\.pdf/ });
+    const names = within(select)
+      .getAllByRole('option')
+      .map((option) => option.textContent);
+    expect(names.some((name) => name?.includes('menu.pdf'))).toBe(true);
+    for (const hidden of ['en_cola.pdf', 'procesando.pdf', 'fallido.pdf']) {
+      expect(names.some((name) => name?.includes(hidden))).toBe(false);
+    }
+  });
 });
