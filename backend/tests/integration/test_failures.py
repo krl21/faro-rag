@@ -11,7 +11,6 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from opentelemetry.trace import StatusCode
 
 from app.ai.extraction.field_extractor import FieldExtractor
-from app.ai.ingestion.pypdf_extractor import PypdfExtractor
 from app.ai.providers.fake_provider import FakeEmbeddingProvider, FakeLLMProvider
 from app.config import get_settings
 from app.core.errors import ProviderError, QueueUnavailableError
@@ -26,6 +25,7 @@ from app.services.document_service import DocumentService
 from app.services.storage import LocalStorage
 from app.worker.tasks import process_document
 from tests.fixtures.pdf_factory import POLICY_TEXT, make_pdf
+from tests.fixtures.text_layer_extractor import TextLayerExtractor
 
 pytestmark = pytest.mark.integration
 
@@ -56,7 +56,7 @@ def _processor(embeddings=None, llm=None) -> DocumentProcessor:
     return DocumentProcessor(
         settings=settings,
         storage=LocalStorage(settings.storage_dir),
-        extractor=PypdfExtractor(),
+        extractor=TextLayerExtractor(),
         embeddings=embeddings or FakeEmbeddingProvider(settings.embedding_dim),
         field_extractor=FieldExtractor(
             llm or FakeLLMProvider(),
@@ -102,7 +102,7 @@ def test_invalid_llm_output_keeps_document_done_with_failed_fields(clean_databas
     document = _document(document_id)
     assert outcome.status == DocumentStatus.DONE
     assert document.status == DocumentStatus.DONE
-    failed = {f.name for f in document.fields if f.status == "failed"}
+    failed = {f.label for f in document.fields if f.status == "failed"}
     assert failed == {
         "policy_number",
         "validity",
@@ -118,7 +118,7 @@ def test_reprocessing_replaces_fields_without_duplicates(clean_database):
     document_id = _create_pending(make_pdf([POLICY_TEXT]))
     _processor().process(document_id)
     _processor().process(document_id)
-    names = [f.name for f in _document(document_id).fields]
+    names = [f.label for f in _document(document_id).fields]
     assert len(names) == len(set(names))
 
 
