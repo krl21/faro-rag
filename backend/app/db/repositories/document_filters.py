@@ -1,7 +1,7 @@
-"""Translate chat filters into SQL over ``documents`` and ``field_values``.
+"""Translate chat filters into SQL over ``documents`` and ``extracted_fields``.
 
 Every condition uses an indexed column: ``documents.document_type`` and
-``created_at``, and ``field_values`` by ``(field_name, text_value)``, trigram
+``created_at``, and the filter columns of ``extracted_fields`` by ``(name, text_value)``, trigram
 on ``text_value``, ``(field_name, number_value)`` and ``(field_name,
 date_from, date_to)``. Values are always bound parameters, never SQL text.
 """
@@ -15,8 +15,8 @@ from sqlalchemy import ColumnElement, Select, and_, exists, false, not_, or_, se
 from sqlalchemy.orm import Session
 
 from app.core.text_normalization import normalize_identifier, normalize_name
-from app.db.models import Document, FieldValue
-from app.domain.enums import DocumentStatus, FilterField
+from app.db.models import Document, ExtractedField
+from app.domain.enums import DocumentStatus, DocumentType, FilterField
 from app.domain.indexed_fields import AMOUNT_FIELD, DOCUMENT_DATE_FIELDS, is_identifier
 from app.schemas.filters import AmountRange, DateRange, FieldValues, QueryFilters
 
@@ -97,7 +97,11 @@ class DocumentFilterRepository:
         Returns:
             The filtered query.
         """
-        conditions: list[ColumnElement[bool]] = [Document.status == DocumentStatus.DONE]
+        conditions: list[ColumnElement[bool]] = [
+            Document.status == DocumentStatus.DONE,
+            # The chat only works with policies and invoices.
+            Document.document_type.is_distinct_from(DocumentType.UNKNOWN.value),
+        ]
         if filters.document_type:
             conditions.append(Document.document_type == filters.document_type.value)
         if filters.uploaded:
@@ -119,12 +123,12 @@ class DocumentFilterRepository:
         """Build ``EXISTS`` over the values of the current document.
 
         Args:
-            *conditions: Conditions on ``field_values``.
+            *conditions: Conditions on ``extracted_fields``.
 
         Returns:
             The ``EXISTS`` clause.
         """
-        return exists().where(FieldValue.document_id == Document.id, *conditions)
+        return exists().where(ExtractedField.document_id == Document.id, *conditions)
 
     def _group(self, group: FieldValues) -> ColumnElement[bool]:
         """Condition for one include/exclude group: the field has any of the values.
@@ -140,8 +144,8 @@ class DocumentFilterRepository:
         if is_identifier(group.field):
             normalized = [normalize_identifier(v) for v in group.values]
             return self._value_exists(
-                FieldValue.field_name == group.field.value,
-                FieldValue.text_value.in_([v for v in normalized if v]),
+                ExtractedField.name == group.field.value,
+                ExtractedField.text_value.in_([v for v in normalized if v]),
             )
         # A value with only punctuation normalizes to "" and would match
         # everything with LIKE '%%': such values match nothing instead.
@@ -150,8 +154,8 @@ class DocumentFilterRepository:
             return false()
         patterns = [f"%{_escape_like(n)}%" for n in names]
         return self._value_exists(
-            FieldValue.field_name == group.field.value,
-            or_(*(FieldValue.text_value.like(p, escape="\\") for p in patterns)),
+            ExtractedField.name == group.field.value,
+            or_(*(ExtractedField.text_value.like(p, escape="\\") for p in patterns)),
         )
 
     def _document_date(self, range_: DateRange) -> ColumnElement[bool]:
@@ -164,12 +168,12 @@ class DocumentFilterRepository:
             The condition.
         """
         conditions: list[ColumnElement[bool]] = [
-            FieldValue.field_name.in_(sorted(DOCUMENT_DATE_FIELDS))
+            ExtractedField.name.in_(sorted(DOCUMENT_DATE_FIELDS))
         ]
         if range_.end:
-            conditions.append(FieldValue.date_from <= range_.end)
+            conditions.append(ExtractedField.date_from <= range_.end)
         if range_.start:
-            conditions.append(FieldValue.date_to >= range_.start)
+            conditions.append(ExtractedField.date_to >= range_.start)
         return self._value_exists(*conditions)
 
     def _amount(self, range_: AmountRange) -> ColumnElement[bool]:
@@ -181,13 +185,13 @@ class DocumentFilterRepository:
         Returns:
             The condition.
         """
-        conditions: list[ColumnElement[bool]] = [FieldValue.field_name == AMOUNT_FIELD]
+        conditions: list[ColumnElement[bool]] = [ExtractedField.name == AMOUNT_FIELD]
         if range_.min is not None:
-            conditions.append(FieldValue.number_value >= range_.min)
+            conditions.append(ExtractedField.number_value >= range_.min)
         if range_.max is not None:
-            conditions.append(FieldValue.number_value <= range_.max)
+            conditions.append(ExtractedField.number_value <= range_.max)
         if range_.currency:
-            conditions.append(FieldValue.currency == range_.currency)
+            conditions.append(ExtractedField.currency == range_.currency)
         return self._value_exists(*conditions)
 
 

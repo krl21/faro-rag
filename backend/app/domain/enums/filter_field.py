@@ -7,7 +7,7 @@ class FilterField(StrEnum):
     """Fields a chat question can filter documents by.
 
     Every value except ``DOCUMENT_TYPE`` is also the name of an extracted field
-    indexed in ``field_values``.
+    with filter columns in ``extracted_fields``.
     """
 
     DOCUMENT_TYPE = "document_type"
