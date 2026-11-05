@@ -35,7 +35,9 @@ def upgrade() -> None:
         "extracted_fields",
         sa.Column("is_predefined", sa.Boolean(), nullable=False, server_default=sa.false()),
     )
-    op.execute("UPDATE extracted_fields SET is_predefined = true, label = name WHERE name IS NOT NULL")
+    op.execute(
+        "UPDATE extracted_fields SET is_predefined = true, label = name WHERE name IS NOT NULL"
+    )
     # Table rows: object -> ordered list (the current order is the one JSONB kept).
     op.execute(
         """
@@ -83,5 +85,7 @@ def downgrade() -> None:
     for index, columns in _KEY_INDEXES.items():
         op.drop_index(index, table_name="extracted_fields")
         op.create_index(index, "extracted_fields", ["name", *columns])
-    op.create_unique_constraint("uq_field_per_document", "extracted_fields", ["document_id", "name"])
+    op.create_unique_constraint(
+        "uq_field_per_document", "extracted_fields", ["document_id", "name"]
+    )
     op.drop_column("extracted_fields", "is_predefined")
