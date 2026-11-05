@@ -1,29 +1,27 @@
-"""PDF text extraction interface and extractor selection."""
+"""PDF text extraction interface and the check for pages with text."""
 
 from pathlib import Path
 from typing import Protocol
 
-from app.config import Settings
 from app.core.errors import NoExtractableTextError
-from app.domain.dtos import PageText
-from app.domain.enums import PdfExtractorName
+from app.domain.dtos import ExtractedPdf, PageText
 
 # Pages with fewer meaningful characters are treated as empty (scans, blank pages).
 MIN_PAGE_CHARS = 20
 
 
 class PdfExtractor(Protocol):
-    """Extracts text from a PDF, page by page."""
+    """Extracts the text of a PDF, page by page, and its label-value data."""
 
-    def extract(self, path: Path, *, max_pages: int) -> list[PageText]:
-        """Extract the text of every page.
+    def extract(self, path: Path, *, max_pages: int) -> ExtractedPdf:
+        """Extract the text of every page and the data of its tables and lines.
 
         Args:
             path: PDF file on disk.
             max_pages: Maximum number of pages accepted.
 
         Returns:
-            One entry per page, in order.
+            The text of every page, in order, and the data found.
 
         Raises:
             CorruptPdfError: If the file cannot be parsed.
@@ -51,21 +49,3 @@ def ensure_has_text(pages: list[PageText]) -> list[PageText]:
             "The PDF has no extractable text (it may be a scanned document)"
         )
     return useful
-
-
-def build_pdf_extractor(settings: Settings) -> PdfExtractor:
-    """Create the extractor selected by ``PDF_EXTRACTOR``.
-
-    Args:
-        settings: Application settings.
-
-    Returns:
-        The configured extractor.
-    """
-    if settings.pdf_extractor is PdfExtractorName.DOCLING:
-        from app.ai.ingestion.docling_extractor import DoclingExtractor
-
-        return DoclingExtractor()
-    from app.ai.ingestion.pypdf_extractor import PypdfExtractor
-
-    return PypdfExtractor()
