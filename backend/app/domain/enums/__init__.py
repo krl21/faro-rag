@@ -13,7 +13,6 @@ from app.domain.enums.field_value_type import FieldValueType
 from app.domain.enums.filter_field import FilterField
 from app.domain.enums.filter_source import FilterSource
 from app.domain.enums.llm_provider_name import LLMProviderName
-from app.domain.enums.pdf_extractor_name import PdfExtractorName
 from app.domain.enums.unresolved import Unresolved
 
 __all__ = [
@@ -30,6 +29,5 @@ __all__ = [
     "FilterField",
     "FilterSource",
     "LLMProviderName",
-    "PdfExtractorName",
     "Unresolved",
 ]
