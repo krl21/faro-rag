@@ -1,6 +1,7 @@
 """Convert ORM objects into API response models."""
 
 from app.ai.extraction.specs import find_spec
+from app.db.fact_values import from_stored
 from app.db.models import Conversation, Document, ExtractedField
 from app.domain.dtos import ChatResult
 from app.schemas.ask import AskResponse
@@ -8,6 +9,7 @@ from app.schemas.conversations import ConversationDetail, ConversationMessage
 from app.schemas.documents import (
     DocumentDetail,
     DocumentError,
+    DocumentFactOut,
     DocumentSummary,
     ExtractedFieldOut,
 )
@@ -59,9 +61,9 @@ def to_field_out(field: ExtractedField, document_type: str | None) -> ExtractedF
     Returns:
         The field model.
     """
-    spec = find_spec(document_type, field.name)
+    spec = find_spec(document_type, field.label)
     out = ExtractedFieldOut(
-        name=field.name,
+        name=field.label,
         value=field.value,
         confidence=field.confidence,
         status=field.status,
@@ -91,7 +93,44 @@ def to_detail(document: Document, chunk_count: int) -> DocumentDetail:
         **to_summary(document).model_dump(),
         chunk_count=chunk_count,
         fields=[to_field_out(f, document.document_type) for f in document.fields],
+        facts=[to_fact_out(f) for f in document.facts],
     )
+
+
+def to_fact_out(fact: ExtractedField) -> DocumentFactOut:
+    """Map a stored free datum.
+
+    Args:
+        fact: Row of ``extracted_fields`` without ``name``.
+
+    Returns:
+        The datum model.
+    """
+    return DocumentFactOut(
+        id=fact.id,
+        label=fact.label,
+        value=from_stored(fact.value),
+        page=fact.page,
+        table_index=fact.table_index,
+        row_index=fact.row_index,
+        status=fact.status,
+        original_value=_original(fact.original_value),
+        edited_at=fact.edited_at,
+    )
+
+
+def _original(original: dict | None) -> dict | None:
+    """Show the original label and value of a free datum (value in API form).
+
+    Args:
+        original: Stored ``{"label": ..., "value": ...}``, or ``None``.
+
+    Returns:
+        The same pair with the value as text or ordered columns.
+    """
+    if not original:
+        return None
+    return {"label": original.get("label"), "value": from_stored(original.get("value"))}
 
 
 def to_ask_response(result: ChatResult) -> AskResponse:
