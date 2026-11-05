@@ -128,7 +128,11 @@ class DocumentFilterRepository:
         Returns:
             The ``EXISTS`` clause.
         """
-        return exists().where(ExtractedField.document_id == Document.id, *conditions)
+        return exists().where(
+            ExtractedField.document_id == Document.id,
+            ExtractedField.is_predefined.is_(True),
+            *conditions,
+        )
 
     def _group(self, group: FieldValues) -> ColumnElement[bool]:
         """Condition for one include/exclude group: the field has any of the values.
@@ -144,7 +148,7 @@ class DocumentFilterRepository:
         if is_identifier(group.field):
             normalized = [normalize_identifier(v) for v in group.values]
             return self._value_exists(
-                ExtractedField.name == group.field.value,
+                ExtractedField.label == group.field.value,
                 ExtractedField.text_value.in_([v for v in normalized if v]),
             )
         # A value with only punctuation normalizes to "" and would match
@@ -154,7 +158,7 @@ class DocumentFilterRepository:
             return false()
         patterns = [f"%{_escape_like(n)}%" for n in names]
         return self._value_exists(
-            ExtractedField.name == group.field.value,
+            ExtractedField.label == group.field.value,
             or_(*(ExtractedField.text_value.like(p, escape="\\") for p in patterns)),
         )
 
@@ -168,7 +172,7 @@ class DocumentFilterRepository:
             The condition.
         """
         conditions: list[ColumnElement[bool]] = [
-            ExtractedField.name.in_(sorted(DOCUMENT_DATE_FIELDS))
+            ExtractedField.label.in_(sorted(DOCUMENT_DATE_FIELDS))
         ]
         if range_.end:
             conditions.append(ExtractedField.date_from <= range_.end)
@@ -185,7 +189,7 @@ class DocumentFilterRepository:
         Returns:
             The condition.
         """
-        conditions: list[ColumnElement[bool]] = [ExtractedField.name == AMOUNT_FIELD]
+        conditions: list[ColumnElement[bool]] = [ExtractedField.label == AMOUNT_FIELD]
         if range_.min is not None:
             conditions.append(ExtractedField.number_value >= range_.min)
         if range_.max is not None:
