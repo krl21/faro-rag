@@ -19,6 +19,8 @@ celery_app.conf.update(
     # idempotent, so a duplicate run is harmless.
     task_acks_late=True,
     task_reject_on_worker_lost=True,
+    # Child processes of this worker; each one loads its own embedding model.
+    worker_concurrency=settings.worker_concurrency,
     worker_prefetch_multiplier=1,
     # Must exceed the longest task, or Redis redelivers it while still running.
     broker_transport_options={"visibility_timeout": 3600},
