@@ -85,6 +85,9 @@ class _Retriever:
     def retrieve(self, question, document_ids=None, pages=None):
         return []
 
+    def retrieve_sources(self, question, document_ids=None, pages=None):
+        return [], []
+
 
 def _chat_service(session, llm: FakeLLMProvider, context_turns: int = 3) -> ChatService:
     settings = get_settings()
