@@ -41,6 +41,10 @@ describe('DocumentsPage', () => {
     expect(screen.getByText(/No es una póliza ni una factura/)).toBeInTheDocument();
     expect(screen.getByText('Total').nextSibling).toHaveTextContent('3');
     expect(screen.getByText('Con error').nextSibling).toHaveTextContent('1');
+    // Only processed documents (also `unknown` ones) open the fields view.
+    expect(screen.getByRole('button', { name: 'a.pdf' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /menu\.pdf/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /escaneado\.pdf/ })).not.toBeInTheDocument();
   });
 
   it('polls while a document is processing and stops when it is done', async () => {
