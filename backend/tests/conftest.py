@@ -21,6 +21,19 @@ import pytest
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(scope="session", autouse=True)
+def text_layer_extractor() -> Iterator[None]:
+    """Make the worker read PDFs without Docling (not installed in the test image)."""
+    from app.worker import tasks
+    from tests.fixtures.text_layer_extractor import TextLayerExtractor
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(tasks, "DoclingExtractor", TextLayerExtractor)
+        tasks.get_processor.cache_clear()
+        yield
+    tasks.get_processor.cache_clear()
+
+
 @pytest.fixture(scope="session")
 def migrated_database() -> None:
     """Apply the Alembic migrations to the test database once per session."""
