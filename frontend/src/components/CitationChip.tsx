@@ -8,15 +8,20 @@ function baseName(filename: string): string {
   return filename.replace(/\.pdf$/i, '');
 }
 
+/** What the citation points to, without the page. */
+function citationOrigin(citation: Citation): string {
+  if (citation.source === 'fragment') return baseName(citation.filename);
+  // A fixed field has a Spanish label; a free one (table row, "label: value") only has the excerpt.
+  return citation.field ? `Dato extraído: ${fieldLabel(citation.field)}` : 'Dato del documento';
+}
+
 /**
  * `informe_pericial · pág. 2` for a fragment, `Dato extraído: Fecha de la factura · pág. 1`
- * for a field. The page only shows when the API knows it.
+ * for a fixed field, `Dato del documento · pág. 1` for a free one. The page only shows
+ * when the API knows it.
  */
 function citationText(citation: Citation): string {
-  const origin =
-    citation.source === 'field' && citation.field
-      ? `Dato extraído: ${fieldLabel(citation.field)}`
-      : baseName(citation.filename);
+  const origin = citationOrigin(citation);
   return citation.page === null ? origin : `${origin} · ${formatPage(citation.page)}`;
 }
 

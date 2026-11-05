@@ -37,4 +37,17 @@ describe('CitationChip', () => {
     );
     expect(screen.getByText('Dato extraído: Titular')).toBeInTheDocument();
   });
+
+  it('shows a free document datum generically, with its label and value on hover', () => {
+    const datum: Citation = {
+      ...fragment,
+      source: 'field',
+      field: null,
+      page: 1,
+      excerpt: 'TOTAL FACTURA: 1.548,80 €',
+    };
+    render(<CitationChip citation={datum} />);
+    const text = screen.getByText('Dato del documento · pág. 1');
+    expect(text.parentElement).toHaveAttribute('title', datum.excerpt);
+  });
 });
