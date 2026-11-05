@@ -23,7 +23,7 @@ _WITH_VALUE = frozenset({FieldStatus.OK, FieldStatus.EDITED})
 class _StoredField(Protocol):
     """What this module reads from an ``ExtractedField`` row."""
 
-    name: str
+    label: str
     value: Any
     status: str
     page: int | None
@@ -50,8 +50,8 @@ def build_field_facts(document: _DocumentWithFields) -> list[FieldFact]:
         One fact per usable field, in a stable order.
     """
     facts = []
-    for field in sorted(document.fields, key=lambda f: f.name):
-        label = _LABELS.get(field.name)
+    for field in sorted(document.fields, key=lambda f: f.label):
+        label = _LABELS.get(field.label)
         if label is None or field.status not in _WITH_VALUE or field.value in (None, [], ""):
             continue
         facts.append(
@@ -59,7 +59,7 @@ def build_field_facts(document: _DocumentWithFields) -> list[FieldFact]:
                 document_id=document.id,
                 filename=document.filename,
                 page=field.page,
-                name=field.name,
+                name=field.label,
                 label=label,
                 value=format_value(field.value),
                 edited=field.status == FieldStatus.EDITED,
