@@ -87,9 +87,7 @@ def downgrade() -> None:
         postgresql_ops={"text_value": "gin_trgm_ops"},
     )
     op.create_index("ix_field_values_number", "field_values", ["field_name", "number_value"])
-    op.create_index(
-        "ix_field_values_dates", "field_values", ["field_name", "date_from", "date_to"]
-    )
+    op.create_index("ix_field_values_dates", "field_values", ["field_name", "date_from", "date_to"])
     op.execute(
         """
         INSERT INTO field_values
