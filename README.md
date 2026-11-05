@@ -91,7 +91,7 @@ make help                               # every command
 The interface has three views, chosen in the sidebar:
 
 - **Documents:** upload and list with their status (polling while they are processed) and the reason for failures.
-- **Chat:** questions about every document or about one, with visible citations (document and page) and a separate block for "no evidence".
+- **Chat:** questions about one processed document (`POST /documents/{id}/ask`), with visible citations (document and page) and a separate block for "no evidence". Questions across every document, with filters, are available through the API (`POST /ask`).
 - **Fields:** fields extracted from a document with their confidence, status and page; failed ones are flagged. Fields and free data can be edited and deleted.
 
 ## 4. Architecture
