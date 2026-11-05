@@ -30,9 +30,7 @@ def upgrade() -> None:
     op.add_column("extracted_fields", sa.Column("label", sa.String(255)))
     op.add_column("extracted_fields", sa.Column("table_index", sa.Integer()))
     op.add_column("extracted_fields", sa.Column("row_index", sa.Integer()))
-    op.add_column(
-        "extracted_fields", sa.Column("embedding", Vector(get_settings().embedding_dim))
-    )
+    op.add_column("extracted_fields", sa.Column("embedding", Vector(get_settings().embedding_dim)))
 
 
 def downgrade() -> None:
