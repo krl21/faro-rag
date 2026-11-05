@@ -1,5 +1,5 @@
 import type { DocumentSummary } from '../api/types';
-import { isOutOfScope } from '../lib/documentRules';
+import { isOutOfScope, isProcessed } from '../lib/documentRules';
 import { documentErrorMessage, OUT_OF_SCOPE_MESSAGE } from '../lib/errorMessages';
 import { documentTypeLabel } from '../lib/labels';
 import styles from './DocumentsTable.module.css';
@@ -9,6 +9,23 @@ interface DocumentsTableProps {
   documents: DocumentSummary[];
   /** Opens the extracted fields of a document. */
   onOpen: (id: string) => void;
+}
+
+/** File name, with the failure reason or the out-of-scope note under it. */
+function DocumentName({ document }: { document: DocumentSummary }) {
+  return (
+    <>
+      <span className={styles.filename}>{document.filename}</span>
+      {document.error && (
+        <span className={`${styles.subline} ${styles.error}`}>
+          {documentErrorMessage(document.error)}
+        </span>
+      )}
+      {isOutOfScope(document) && (
+        <span className={`${styles.subline} ${styles.note}`}>{OUT_OF_SCOPE_MESSAGE}</span>
+      )}
+    </>
+  );
 }
 
 export function DocumentsTable({ documents, onOpen }: DocumentsTableProps) {
@@ -27,24 +44,21 @@ export function DocumentsTable({ documents, onOpen }: DocumentsTableProps) {
           {documents.map((document) => (
             <tr key={document.id}>
               <td>
-                <button
-                  type="button"
-                  className={styles.open}
-                  onClick={() => onOpen(document.id)}
-                  title="Ver campos extraídos"
-                >
-                  <span className={styles.filename}>{document.filename}</span>
-                  {document.error && (
-                    <span className={`${styles.subline} ${styles.error}`}>
-                      {documentErrorMessage(document.error)}
-                    </span>
-                  )}
-                  {isOutOfScope(document) && (
-                    <span className={`${styles.subline} ${styles.note}`}>
-                      {OUT_OF_SCOPE_MESSAGE}
-                    </span>
-                  )}
-                </button>
+                {isProcessed(document) ? (
+                  <button
+                    type="button"
+                    className={styles.open}
+                    onClick={() => onOpen(document.id)}
+                    title="Ver campos extraídos"
+                  >
+                    <DocumentName document={document} />
+                  </button>
+                ) : (
+                  // Pending, processing or failed: there are no fields to open yet.
+                  <div className={styles.static}>
+                    <DocumentName document={document} />
+                  </div>
+                )}
               </td>
               <td className={styles.muted}>{documentTypeLabel(document.document_type)}</td>
               <td className={styles.muted}>{document.page_count ?? '—'}</td>
