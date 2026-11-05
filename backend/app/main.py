@@ -9,7 +9,15 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from app.ai.providers.factory import get_embedding_provider
 from app.api.request_logging import log_requests
-from app.api.routes import ask, conversations, document_ask, document_fields, documents, health
+from app.api.routes import (
+    ask,
+    conversations,
+    document_ask,
+    document_facts,
+    document_fields,
+    documents,
+    health,
+)
 from app.config import get_settings
 from app.core.exception_handlers import register_exception_handlers
 from app.core.logging import configure_logging
@@ -57,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(documents.router)
     app.include_router(document_fields.router)
+    app.include_router(document_facts.router)
     app.include_router(document_ask.router)
     app.include_router(ask.router)
     app.include_router(conversations.router)
