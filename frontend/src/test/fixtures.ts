@@ -47,6 +47,8 @@ export function makeAnswer(overrides: Partial<AskResponse> = {}): AskResponse {
         marker: 1,
         document_id: 'doc-1',
         filename: 'informe_pericial.pdf',
+        source: 'fragment',
+        field: null,
         page: 2,
         excerpt: 'Daños por agua…',
       },
