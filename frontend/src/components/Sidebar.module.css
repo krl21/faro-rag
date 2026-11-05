@@ -7,6 +7,11 @@
   padding: 24px 16px;
   background: var(--color-sidebar);
   border-right: 1px solid var(--color-sidebar-border);
+  /* Fixed while the page (for example the chat) scrolls. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .brand {
@@ -41,6 +46,8 @@
     gap: 16px;
     padding: 16px;
     border-right: 0;
+    position: static;
+    height: auto;
     border-bottom: 1px solid var(--color-sidebar-border);
   }
 
