@@ -1,0 +1,355 @@
+[
+  {
+    "id": "q1",
+    "question": "¿Cuál es el importe total de la factura?",
+    "document": "factura_electronica.pdf",
+    "expected": "53.275,88 € IVA incluido (base imponible 44.029,65 €).",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q2",
+    "question": "¿Cómo se paga el vehículo?",
+    "document": "factura_electronica.pdf",
+    "expected": "Transferencia bancaria a 30 días. Financiación: Sin financiación.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q3",
+    "question": "¿Qué matrícula se asignó al vehículo?",
+    "document": "factura_electronica.pdf",
+    "expected": "1163 RNH",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q4",
+    "question": "¿Cuál es el número de bastidor (VIN) del vehículo vendido?",
+    "document": "factura_electronica.pdf",
+    "expected": "VFC8ZD3719MKG5HUN",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q5",
+    "question": "¿En qué año y dónde se fundó Motor Bahía Sur?",
+    "document": "factura_electronica.pdf",
+    "expected": "En 2009, en Jerez de la Frontera.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 2
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q6",
+    "question": "¿Cuántas personas trabajan en Motor Bahía Sur?",
+    "document": "factura_electronica.pdf",
+    "expected": "124 personas entre sus dos sedes.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 2
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q7",
+    "question": "¿Qué puntuación media obtuvo Motor Bahía Sur en la encuesta de calidad de 2025?",
+    "document": "factura_electronica.pdf",
+    "expected": "9,0 sobre 10.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 3
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q8",
+    "question": "¿Cuántas horas de formación al año tienen los empleados de Motor Bahía Sur?",
+    "document": "factura_electronica.pdf",
+    "expected": "Al menos 40 horas al año dentro de su jornada.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 4
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q9",
+    "question": "¿Cuántos días a la semana se puede teletrabajar en Motor Bahía Sur?",
+    "document": "factura_electronica.pdf",
+    "expected": "Dos días a la semana, en los puestos que lo permiten.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 4
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q10",
+    "question": "¿Cuándo da Motor Bahía Sur un vehículo de sustitución a los clientes de flotas?",
+    "document": "factura_electronica.pdf",
+    "expected": "Si el vehículo queda inmovilizado más de 72 horas por una reparación en su taller.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_electronica.pdf",
+        "page": 3
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q11",
+    "question": "¿Cuál es el importe total de la factura?",
+    "document": "factura_taller.pdf",
+    "expected": "3.337,36 € IVA incluido.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 2
+      }
+    ]
+  },
+  {
+    "id": "q12",
+    "question": "¿Qué parte de la factura paga la aseguradora y cuál el cliente?",
+    "document": "factura_taller.pdf",
+    "expected": "La aseguradora paga 3.337,36 €; el cliente, 0,00 € de franquicia.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 2
+      }
+    ]
+  },
+  {
+    "id": "q13",
+    "question": "¿Cuándo vence el pago de la factura?",
+    "document": "factura_taller.pdf",
+    "expected": "31/03/2026",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q14",
+    "question": "¿A qué siniestro y póliza corresponde la factura?",
+    "document": "factura_taller.pdf",
+    "expected": "Al siniestro FDS-SIN-2026-63556 de la póliza FDS-AUT-2026-338626.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q15",
+    "question": "¿Cuántas horas de mano de obra de electricidad se facturan?",
+    "document": "factura_taller.pdf",
+    "expected": "5 h a 55,00 € por hora.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q16",
+    "question": "¿Cuánto se cobra por «Aceite de motor 5W30 (litro)»?",
+    "document": "factura_taller.pdf",
+    "expected": "88,02 € (6 ud a 14,67 €).",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "factura_taller.pdf",
+        "page": 2
+      }
+    ],
+    "purpose": "Cita de la pág. 2"
+  },
+  {
+    "id": "q17",
+    "question": "¿Hasta cuándo está vigente la póliza?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "Hasta el 18/06/2027 a las 24:00 h (efecto el 19/06/2026).",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q18",
+    "question": "¿Cuál es la prima total anual de la póliza?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "711,23 €, impuestos y recargos incluidos.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q19",
+    "question": "¿Qué franquicia tiene la cobertura de daños propios?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "600 € por siniestro.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 1
+      }
+    ]
+  },
+  {
+    "id": "q20",
+    "question": "¿En qué plazo hay que comunicar un siniestro?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "En un plazo máximo de 5 días desde que se conoció.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 1
+      },
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 5
+      }
+    ]
+  },
+  {
+    "id": "q21",
+    "question": "¿En qué plazo debe pagar la aseguradora la indemnización?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "En un máximo de 40 días desde la declaración del siniestro, si ha concluido las investigaciones necesarias.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 5
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q22",
+    "question": "¿Quién indemniza los riesgos extraordinarios, como inundaciones o terremotos?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "El Consorcio de Compensación de Seguros, conforme a su normativa propia.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 4
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q23",
+    "question": "¿Con cuánta antelación hay que oponerse a la prórroga de la póliza?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "Al menos un mes antes si es el tomador y dos meses si es la aseguradora.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 8
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q24",
+    "question": "¿Cuándo prescriben las acciones derivadas del contrato de seguro?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "A los dos años en los seguros de daños y a los cinco en los de personas.",
+    "answerable": true,
+    "sources": [
+      {
+        "document": "poliza_condiciones_generales.pdf",
+        "page": 9
+      }
+    ],
+    "purpose": "Recuperación desde texto corrido"
+  },
+  {
+    "id": "q25",
+    "question": "¿Qué establece la cláusula 215 del anexo?",
+    "document": "anexo_extenso.pdf",
+    "expected": "No puedo contestar: el anexo falla al procesarse porque supera el máximo de páginas (231 > 200, too_many_pages); la API responde que el documento no está listo (409 document_not_ready).",
+    "answerable": false,
+    "purpose": "Documento rechazado: no debe haber evidencia",
+    "expected_document_status": "failed (TOO_MANY_PAGES)",
+    "sources": []
+  },
+  {
+    "id": "q26",
+    "question": "¿Cubre la póliza los viajes al espacio?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "No puedo contestar: los documentos no contienen información sobre ese riesgo.",
+    "answerable": false,
+    "sources": []
+  },
+  {
+    "id": "q27",
+    "question": "¿Cuál es el teléfono móvil de Elena Gil Serrano?",
+    "document": "poliza_condiciones_generales.pdf",
+    "expected": "No puedo contestar: el dato no aparece en los documentos.",
+    "answerable": false,
+    "sources": []
+  }
+]
