@@ -5,6 +5,9 @@ import type { DocumentError } from '../api/types';
  * What the user reads for each API error code: the problem and, when there is
  * one, what to do. Never codes, HTTP statuses or the API text (technical, in English).
  */
+/** Failures inside the server: the user can only try again. */
+const INTERNAL_ERROR = 'Se produjo un error interno. Inténtalo de nuevo.';
+
 const MESSAGES: Record<string, string> = {
   // Upload (synchronous validation in the API)
   invalid_file_type: 'El fichero no es un PDF válido.',
@@ -18,9 +21,9 @@ const MESSAGES: Record<string, string> = {
   extractor_unavailable: 'El extractor de texto no está disponible.',
   processing_failed: 'No se pudo procesar el documento.',
   processing_error: 'Error inesperado al procesar el documento.',
-  // LLM
-  provider_error: 'Fallo del modelo de lenguaje. Inténtalo de nuevo.',
-  provider_timeout: 'El modelo de lenguaje tardó demasiado en responder. Inténtalo de nuevo.',
+  // LLM: internal detail, not named to the user
+  provider_error: INTERNAL_ERROR,
+  provider_timeout: INTERNAL_ERROR,
   // Chat
   rate_limited: 'Has hecho demasiadas preguntas seguidas. Espera un minuto y vuelve a intentarlo.',
   document_not_ready: 'El documento todavía no ha terminado de procesarse.',
