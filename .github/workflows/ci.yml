@@ -11,7 +11,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # TODO(backend): job de lint y tests del backend.
+  # Backend: same `tests` service as `make test` (test image, PostgreSQL with
+  # pgvector and the faro_test database, Redis, fake LLM and embeddings).
+  backend:
+    name: Backend (lint, format, unit and integration tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the test image
+        run: docker compose --profile test build tests
+      # The checkout is mounted into the container and belongs to another user:
+      # no ruff or pytest cache is written there.
+      - name: Lint and format (ruff)
+        run: docker compose --profile test run --rm tests sh -c "ruff check --no-cache . && ruff format --check --no-cache ."
+      - name: Tests (pytest)
+        run: docker compose --profile test run --rm tests pytest -q -p no:cacheprovider
+      - name: Stop the services
+        if: always()
+        run: docker compose --profile test down -v
 
   frontend:
     name: Frontend (types, lint, format, tests, build)
