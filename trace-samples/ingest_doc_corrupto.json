@@ -1,0 +1,1342 @@
+{
+  "data": [
+    {
+      "traceID": "0a13f62acead1656ad56beabd93a45fa",
+      "spans": [
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "be281d83b66f6837",
+          "operationName": "POST /documents http send",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384143709,
+          "duration": 20,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.response.start"
+            },
+            {
+              "key": "http.status_code",
+              "type": "int64",
+              "value": 202
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "1873b02c826d1603",
+          "operationName": "UPDATE faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384195418,
+          "duration": 11418,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "UPDATE faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "UPDATE documents SET status=%(status)s::VARCHAR, error_code=%(error_code)s::VARCHAR, error_message=%(error_message)s::VARCHAR, updated_at=%(updated_at)s::TIMESTAMP WITH TIME ZONE WHERE documents.id = %(documents_id)s::UUID"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "7fa77034368807d5",
+          "operationName": "connect",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384139387,
+          "duration": 395,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "8a6292ddcac31242",
+          "operationName": "ingest.extract_text",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384151774,
+          "duration": 41466,
+          "tags": [
+            {
+              "key": "error",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "faro-rag"
+            },
+            {
+              "key": "otel.status_code",
+              "type": "string",
+              "value": "ERROR"
+            },
+            {
+              "key": "otel.status_description",
+              "type": "string",
+              "value": "CorruptPdfError: The PDF cannot be read: Failed to load document (PDFium: Data format error)."
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [
+            {
+              "timestamp": 1793888384193223,
+              "fields": [
+                {
+                  "key": "event",
+                  "type": "string",
+                  "value": "exception"
+                },
+                {
+                  "key": "exception.escaped",
+                  "type": "string",
+                  "value": "False"
+                },
+                {
+                  "key": "exception.message",
+                  "type": "string",
+                  "value": "The PDF cannot be read: Failed to load document (PDFium: Data format error)."
+                },
+                {
+                  "key": "exception.stacktrace",
+                  "type": "string",
+                  "value": "Traceback (most recent call last):\n  File \"/app/app/ai/ingestion/pdf_pages.py\", line 29, in count_pages\n    document = pdfium.PdfDocument(path)\n               ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/pypdfium2/_helpers/document.py\", line 76, in __init__\n    self.raw, to_hold, to_close = _open_pdf(self._input, self._password, self._autoclose)\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/pypdfium2/_helpers/document.py\", line 591, in _open_pdf\n    raise PdfiumError(f\"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).\", err_code=err_code)\npypdfium2._helpers.misc.PdfiumError: Failed to load document (PDFium: Data format error).\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 602, in use_span\n    yield span\n  File \"/opt/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1136, in start_as_current_span\n    yield span\n  File \"/app/app/services/document_processor.py\", line 171, in _run\n    extracted = self._extractor.extract(pdf_path, max_pages=settings.max_pages)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/app/ai/ingestion/docling_extractor.py\", line 39, in extract\n    page_count = count_pages(path)\n                 ^^^^^^^^^^^^^^^^^\n  File \"/app/app/ai/ingestion/pdf_pages.py\", line 31, in count_pages\n    raise CorruptPdfError(f\"The PDF cannot be read: {exc}\") from exc\napp.core.errors.CorruptPdfError: The PDF cannot be read: Failed to load document (PDFium: Data format error).\n"
+                },
+                {
+                  "key": "exception.type",
+                  "type": "string",
+                  "value": "app.core.errors.CorruptPdfError"
+                }
+              ]
+            }
+          ],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "40e19886d0a27960",
+          "operationName": "SELECT faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384146625,
+          "duration": 752,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "SELECT faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "SELECT documents.id, documents.filename, documents.content_hash, documents.size_bytes, documents.storage_path, documents.status, documents.document_type, documents.page_count, documents.error_code, documents.error_message, documents.created_at, documents.updated_at \nFROM documents \nWHERE documents.id = %(id_1)s::UUID"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "47d4dc4025cb6457",
+          "operationName": "run/documents.process",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "64a23318a3eeebcc"
+            }
+          ],
+          "startTime": 1793888384144700,
+          "duration": 63591,
+          "tags": [
+            {
+              "key": "celery.action",
+              "type": "string",
+              "value": "run"
+            },
+            {
+              "key": "celery.delivery_info",
+              "type": "string",
+              "value": "{'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': False}"
+            },
+            {
+              "key": "celery.hostname",
+              "type": "string",
+              "value": "gen8@3f4da4779f63"
+            },
+            {
+              "key": "celery.reply_to",
+              "type": "string",
+              "value": "29b807de-ec54-309a-8c35-f8d720b0a90c"
+            },
+            {
+              "key": "celery.state",
+              "type": "string",
+              "value": "SUCCESS"
+            },
+            {
+              "key": "celery.task_name",
+              "type": "string",
+              "value": "documents.process"
+            },
+            {
+              "key": "document.id",
+              "type": "string",
+              "value": "174bc0cb-1595-4f2a-9460-c21f1f94f7bc"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "messaging.conversation_id",
+              "type": "string",
+              "value": "dd934172-2921-4e19-bbe9-def10b812ade"
+            },
+            {
+              "key": "messaging.destination",
+              "type": "string",
+              "value": "celery"
+            },
+            {
+              "key": "messaging.message.id",
+              "type": "string",
+              "value": "dd934172-2921-4e19-bbe9-def10b812ade"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.celery"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "consumer"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "e58adc7accd8600c",
+          "operationName": "POST /documents",
+          "references": [],
+          "startTime": 1793888384138167,
+          "duration": 6059,
+          "tags": [
+            {
+              "key": "document.duplicate",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "key": "document.id",
+              "type": "string",
+              "value": "174bc0cb-1595-4f2a-9460-c21f1f94f7bc"
+            },
+            {
+              "key": "document.requeued",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "key": "http.flavor",
+              "type": "string",
+              "value": "1.1"
+            },
+            {
+              "key": "http.host",
+              "type": "string",
+              "value": "172.26.0.7:8000"
+            },
+            {
+              "key": "http.method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "key": "http.route",
+              "type": "string",
+              "value": "/documents"
+            },
+            {
+              "key": "http.scheme",
+              "type": "string",
+              "value": "http"
+            },
+            {
+              "key": "http.server_name",
+              "type": "string",
+              "value": "localhost:8000"
+            },
+            {
+              "key": "http.status_code",
+              "type": "int64",
+              "value": 202
+            },
+            {
+              "key": "http.target",
+              "type": "string",
+              "value": "/documents"
+            },
+            {
+              "key": "http.url",
+              "type": "string",
+              "value": "http://localhost:8000/documents"
+            },
+            {
+              "key": "http.user_agent",
+              "type": "string",
+              "value": "curl/8.7.1"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.host.port",
+              "type": "int64",
+              "value": 8000
+            },
+            {
+              "key": "net.peer.ip",
+              "type": "string",
+              "value": "160.79.104.10"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 54954
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "server"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "ae44cd4363f65562",
+          "operationName": "LPUSH",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "64a23318a3eeebcc"
+            }
+          ],
+          "startTime": 1793888384142739,
+          "duration": 210,
+          "tags": [
+            {
+              "key": "db.redis.args_length",
+              "type": "int64",
+              "value": 3
+            },
+            {
+              "key": "db.redis.database_index",
+              "type": "int64",
+              "value": 0
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "LPUSH ? ?"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "redis"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "redis"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 6379
+            },
+            {
+              "key": "net.transport",
+              "type": "string",
+              "value": "ip_tcp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.redis"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "42373c0a508e3472",
+          "operationName": "connect",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384145418,
+          "duration": 723,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "86d121b42fc4dd8d",
+          "operationName": "SELECT faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384139955,
+          "duration": 710,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "SELECT faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "SELECT documents.id, documents.filename, documents.content_hash, documents.size_bytes, documents.storage_path, documents.status, documents.document_type, documents.page_count, documents.error_code, documents.error_message, documents.created_at, documents.updated_at \nFROM documents \nWHERE documents.content_hash = %(content_hash_1)s::VARCHAR"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "64a23318a3eeebcc",
+          "operationName": "apply_async/documents.process",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "58f172f4339e4191"
+            }
+          ],
+          "startTime": 1793888384142510,
+          "duration": 475,
+          "tags": [
+            {
+              "key": "celery.action",
+              "type": "string",
+              "value": "apply_async"
+            },
+            {
+              "key": "celery.task_name",
+              "type": "string",
+              "value": "documents.process"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "messaging.destination",
+              "type": "string",
+              "value": "celery"
+            },
+            {
+              "key": "messaging.destination_kind",
+              "type": "string",
+              "value": "queue"
+            },
+            {
+              "key": "messaging.message.id",
+              "type": "string",
+              "value": "dd934172-2921-4e19-bbe9-def10b812ade"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.celery"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "producer"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "58f172f4339e4191",
+          "operationName": "queue.enqueue",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384142325,
+          "duration": 700,
+          "tags": [
+            {
+              "key": "document.id",
+              "type": "string",
+              "value": "174bc0cb-1595-4f2a-9460-c21f1f94f7bc"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "faro-rag"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "3e236211cc1d59cd",
+          "operationName": "POST /documents http send",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384143997,
+          "duration": 7,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.response.body"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "f36ba847d07fb015",
+          "operationName": "POST /documents http send",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384144200,
+          "duration": 8,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.response.body"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "e989a151fe533851",
+          "operationName": "UPDATE faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384141225,
+          "duration": 526,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "UPDATE faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "UPDATE documents SET status=%(status)s::VARCHAR, error_code=%(error_code)s::VARCHAR, error_message=%(error_message)s::VARCHAR, updated_at=%(updated_at)s::TIMESTAMP WITH TIME ZONE WHERE documents.id = %(documents_id)s::UUID"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "324f3ed5c2630052",
+          "operationName": "SELECT faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384194458,
+          "duration": 476,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "SELECT faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "SELECT documents.id, documents.filename, documents.content_hash, documents.size_bytes, documents.storage_path, documents.status, documents.document_type, documents.page_count, documents.error_code, documents.error_message, documents.created_at, documents.updated_at \nFROM documents \nWHERE documents.id = %(id_1)s::UUID"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "f7d1e47c84aa60fc",
+          "operationName": "connect",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384193749,
+          "duration": 434,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "b7a69331d1a6caa3",
+          "operationName": "POST /documents http receive",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "e58adc7accd8600c"
+            }
+          ],
+          "startTime": 1793888384138490,
+          "duration": 11,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.request"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "0a13f62acead1656ad56beabd93a45fa",
+          "spanID": "16fe3252ac88b349",
+          "operationName": "UPDATE faro",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "0a13f62acead1656ad56beabd93a45fa",
+              "spanID": "47d4dc4025cb6457"
+            }
+          ],
+          "startTime": 1793888384148794,
+          "duration": 928,
+          "tags": [
+            {
+              "key": "db.name",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "db.operation",
+              "type": "string",
+              "value": "UPDATE faro"
+            },
+            {
+              "key": "db.statement",
+              "type": "string",
+              "value": "UPDATE documents SET status=%(status)s::VARCHAR, updated_at=%(updated_at)s::TIMESTAMP WITH TIME ZONE WHERE documents.id = %(documents_id)s::UUID"
+            },
+            {
+              "key": "db.system",
+              "type": "string",
+              "value": "postgresql"
+            },
+            {
+              "key": "db.user",
+              "type": "string",
+              "value": "faro"
+            },
+            {
+              "key": "internal.span.format",
+              "type": "string",
+              "value": "otlp"
+            },
+            {
+              "key": "net.peer.name",
+              "type": "string",
+              "value": "postgres"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 5432
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.sqlalchemy"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "client"
+            }
+          ],
+          "logs": [],
+          "processID": "p2",
+          "warnings": null
+        }
+      ],
+      "processes": {
+        "p1": {
+          "serviceName": "faro-api",
+          "tags": [
+            {
+              "key": "service.instance.id",
+              "type": "string",
+              "value": "5ae2462b-046b-414d-aa81-9b4374fdb981"
+            },
+            {
+              "key": "telemetry.sdk.language",
+              "type": "string",
+              "value": "python"
+            },
+            {
+              "key": "telemetry.sdk.name",
+              "type": "string",
+              "value": "opentelemetry"
+            },
+            {
+              "key": "telemetry.sdk.version",
+              "type": "string",
+              "value": "1.45.2"
+            }
+          ]
+        },
+        "p2": {
+          "serviceName": "faro-worker",
+          "tags": [
+            {
+              "key": "service.instance.id",
+              "type": "string",
+              "value": "049b5808-fe27-41dc-b4ce-c8c200e9c626"
+            },
+            {
+              "key": "telemetry.sdk.language",
+              "type": "string",
+              "value": "python"
+            },
+            {
+              "key": "telemetry.sdk.name",
+              "type": "string",
+              "value": "opentelemetry"
+            },
+            {
+              "key": "telemetry.sdk.version",
+              "type": "string",
+              "value": "1.45.2"
+            }
+          ]
+        }
+      },
+      "warnings": null
+    }
+  ],
+  "total": 0,
+  "limit": 0,
+  "offset": 0,
+  "errors": null
+}
