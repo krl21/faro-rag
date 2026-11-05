@@ -10,7 +10,6 @@ from app.domain.enums import (
     DocumentInput,
     EmbeddingProviderName,
     LLMProviderName,
-    PdfExtractorName,
 )
 
 
@@ -38,7 +37,6 @@ class Settings(BaseSettings):
     max_pages: int = Field(default=200, gt=0)
 
     # --- Ingestion ---
-    pdf_extractor: PdfExtractorName = PdfExtractorName.PYPDF
     chunk_size: int = Field(default=1000, gt=0)
     chunk_overlap: int = Field(default=150, ge=0)
 
@@ -73,6 +71,7 @@ class Settings(BaseSettings):
     retrieval_candidates: int = Field(default=20, gt=0)
     retrieval_min_similarity: float = Field(default=0.35, ge=0, le=1)
     retrieval_rrf_k: int = Field(default=60, gt=0)
+    retrieval_facts_top_k: int = Field(default=15, ge=0, le=100)
 
     # --- Chat ---
     # IANA zone used to resolve "hoy", "ayer"... (America/Toronto: UTC-5, UTC-4 in summer).
@@ -83,6 +82,8 @@ class Settings(BaseSettings):
     chat_list_limit: int = Field(default=50, gt=0, le=500)
 
     # --- Celery task ---
+    # Worker processes running in parallel (documents processed at the same time).
+    worker_concurrency: int = Field(default=2, ge=1, le=16)
     task_max_retries: int = Field(default=3, ge=0)
     task_retry_backoff_seconds: int = Field(default=5, gt=0)
     task_retry_backoff_max_seconds: int = Field(default=60, gt=0)
