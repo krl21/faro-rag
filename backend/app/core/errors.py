@@ -88,6 +88,20 @@ class InvalidFieldValueError(FaroError):
     status_code = 422
 
 
+class FactNotFoundError(FaroError):
+    """The document has no free label-value datum with that id."""
+
+    code = "fact_not_found"
+    status_code = 404
+
+
+class InvalidFactValueError(FaroError):
+    """The label or value sent for a free datum is empty or has the wrong shape."""
+
+    code = "invalid_fact_value"
+    status_code = 422
+
+
 class QueueUnavailableError(FaroError):
     """The processing task could not be sent to the broker."""
 
