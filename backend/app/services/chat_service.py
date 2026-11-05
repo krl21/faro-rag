@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.query.interpreter import QueryInterpreter
 from app.ai.rag.answerer import Answerer
+from app.ai.rag.fact_retriever import FactRetriever
 from app.ai.rag.field_facts import build_field_facts
 from app.core.errors import (
     ConversationNotFoundError,
@@ -65,6 +66,7 @@ class ChatService:
         tz: ZoneInfo,
         context_turns: int,
         list_limit: int,
+        fact_retriever: FactRetriever | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         """Create the service.
@@ -77,6 +79,8 @@ class ChatService:
             context_turns: Previous exchanges given as context to interpret
                 the question (one exchange = question + answer).
             list_limit: Maximum documents returned when listing.
+            fact_retriever: Picks the free label-value data of a document
+                relevant to a question (``None``: only the known fields).
             clock: Current time (injectable for tests).
         """
         self._session = session
@@ -88,6 +92,7 @@ class ChatService:
         self._tz = tz
         self._context_turns = context_turns
         self._list_limit = list_limit
+        self._fact_retriever = fact_retriever
         self._clock = clock
 
     def ask(
@@ -162,6 +167,8 @@ class ChatService:
         and the document's extracted fields (invoice date, amount, policy
         number...) are given to the LLM as citable sources as well, so a
         question about them is answered even when no chunk is similar enough.
+        So are the ``RETRIEVAL_FACTS_TOP_K`` label-value data of its tables and
+        lines that best match the question.
 
         Args:
             document_id: Document to ask about.
@@ -198,13 +205,15 @@ class ChatService:
             span.set_attribute("conversation.id", str(conversation.id))
             now = self._clock()
 
-            # The document is known: its extracted fields are citable sources too.
+            # The document is known: its extracted fields are citable sources too,
+            # plus the label-value data of its tables and lines relevant to the question.
             facts = build_field_facts(document)
             if pages is not None:
                 # A page range also limits the fields: only those found inside it.
                 facts = [f for f in facts if _in_pages(f.page, pages)]
+            if self._fact_retriever is not None:
+                facts += self._fact_retriever.retrieve(document_id, question, pages)
             answer = self._answerer.answer(question, [document_id], pages=pages, facts=facts)
-            print(f"---> answer: {answer}")
 
             result = ChatResult(
                 conversation_id=conversation.id,
@@ -370,6 +379,7 @@ class ChatService:
             question,
             restrict_ids(matching, document_id),
             search_text=filters.query or None,
+            search_facts=True,
         )
         return ChatResult(
             conversation_id=conversation_id,
