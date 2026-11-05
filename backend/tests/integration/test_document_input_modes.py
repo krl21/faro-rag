@@ -6,7 +6,6 @@ import uuid
 import pytest
 
 from app.ai.extraction.field_extractor import FieldExtractor
-from app.ai.ingestion.pypdf_extractor import PypdfExtractor
 from app.ai.providers.fake_provider import FakeEmbeddingProvider, FakeLLMProvider
 from app.config import get_settings
 from app.db.models import Document
@@ -16,6 +15,7 @@ from app.domain.enums import DocumentInput, DocumentStatus, DocumentType
 from app.services.document_processor import DocumentProcessor
 from app.services.storage import LocalStorage
 from tests.fixtures.pdf_factory import make_pdf
+from tests.fixtures.text_layer_extractor import TextLayerExtractor
 
 pytestmark = pytest.mark.integration
 
@@ -44,7 +44,7 @@ def _process(document_id: uuid.UUID, mode: DocumentInput, llm: FakeLLMProvider) 
     DocumentProcessor(
         settings=settings,
         storage=LocalStorage(settings.storage_dir),
-        extractor=PypdfExtractor(),
+        extractor=TextLayerExtractor(),
         embeddings=FakeEmbeddingProvider(settings.embedding_dim),
         field_extractor=FieldExtractor(
             llm,
@@ -65,7 +65,7 @@ def test_pdf_mode_classifies_with_every_page(clean_database):
     document = _process(document_id, DocumentInput.PDF, llm)
     assert document.status == DocumentStatus.DONE
     assert document.document_type == DocumentType.INVOICE
-    amount = next(f for f in document.fields if f.name == "invoice_amount")
+    amount = next(f for f in document.fields if f.label == "invoice_amount")
     assert amount.value == {"amount": "1250.50", "currency": "EUR"}
     assert all(messages[-1].attachments for _, messages in llm.calls)
 
@@ -93,6 +93,6 @@ def test_text_mode_extraction_gets_every_page(clean_database):
 def test_text_mode_extracts_from_every_page(clean_database):
     document_id = _pending(make_pdf([INVOICE_PAGE, "Anexo: matrícula 1234-BCD"]))
     document = _process(document_id, DocumentInput.TEXT, FakeLLMProvider())
-    plate = next(f for f in document.fields if f.name == "license_plate")
+    plate = next(f for f in document.fields if f.label == "license_plate")
     assert document.document_type == DocumentType.INVOICE
     assert plate.value == "1234-BCD"
