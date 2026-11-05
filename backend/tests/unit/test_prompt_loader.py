@@ -164,6 +164,7 @@ def test_each_message_file_is_complete():
         "label",
         "value",
         "edited_note",
+        "detected_facts",
     }
     for name in PROMPT_FILES:
         found = set(re.findall(r"\$([a-z_]+)", load_prompt(name).template))
