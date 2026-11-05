@@ -43,9 +43,19 @@ class Document(Base):
     chunks: Mapped[list["Chunk"]] = relationship(
         back_populates="document", cascade="all, delete-orphan", passive_deletes=True
     )
+    # Fixed fields only (``is_predefined``); the free data are read with ``facts``.
     fields: Mapped[list["ExtractedField"]] = relationship(
         back_populates="document",
+        primaryjoin="and_(Document.id == ExtractedField.document_id, "
+        "ExtractedField.is_predefined.is_(True))",
         cascade="all, delete-orphan",
         passive_deletes=True,
-        order_by="ExtractedField.name",
+        order_by="ExtractedField.label",
+    )
+    facts: Mapped[list["ExtractedField"]] = relationship(
+        primaryjoin="and_(Document.id == ExtractedField.document_id, "
+        "ExtractedField.is_predefined.is_(False))",
+        viewonly=True,
+        order_by="(ExtractedField.page, ExtractedField.table_index, "
+        "ExtractedField.row_index, ExtractedField.id)",
     )
