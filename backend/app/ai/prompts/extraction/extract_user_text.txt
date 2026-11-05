@@ -3,3 +3,8 @@ Extrae los campos del documento.
 <documento>
 $text
 </documento>
+
+Datos detectados automáticamente en las tablas y líneas "campo: valor" del documento. Pueden ayudarte a localizar los valores, pero compruébalos siempre con el documento:
+<datos_detectados>
+$detected_facts
+</datos_detectados>
