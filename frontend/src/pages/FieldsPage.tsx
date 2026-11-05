@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { useDocument } from '../hooks/useDocument';
 import { useDocuments } from '../hooks/useDocuments';
-import { isOutOfScope, isQueryable } from '../lib/documentRules';
+import { isOutOfScope, isProcessed, isQueryable } from '../lib/documentRules';
 import { documentErrorMessage, errorMessage, OUT_OF_SCOPE_MESSAGE } from '../lib/errorMessages';
 import { documentTypeLabel } from '../lib/labels';
 import { isActiveStatus } from '../lib/polling';
@@ -68,7 +68,8 @@ interface FieldsPageProps {
 
 export function FieldsPage({ documentId, onSelectDocument }: FieldsPageProps) {
   const documents = useDocuments();
-  const list = documents.data ?? [];
+  // Only processed documents have something to show; `unknown` ones show the out-of-scope note.
+  const list = (documents.data ?? []).filter(isProcessed);
   // From the menu without a choice: the most recent queryable document (the list is newest first).
   const selectedId = documentId ?? list.find(isQueryable)?.id ?? null;
   const detail = useDocument(selectedId);
