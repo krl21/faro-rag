@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --extra local-embeddings --extra docling
 COPY --chown=app:app . .
 USER app
-CMD ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+CMD ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO"]
 
 FROM base AS test
 RUN --mount=type=cache,target=/root/.cache/uv \
