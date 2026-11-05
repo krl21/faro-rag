@@ -10,12 +10,14 @@ from app.ai.providers.factory import get_embedding_provider, get_llm_provider
 from app.ai.query.interpreter import QueryInterpreter
 from app.ai.query.llm_parser import LLMQueryParser
 from app.ai.rag.answerer import Answerer
+from app.ai.rag.fact_retriever import FactRetriever
 from app.ai.rag.retriever import HybridRetriever
 from app.config import Settings, get_settings
-from app.db.repositories import ChunkRepository
+from app.db.repositories import ChunkRepository, FactRepository
 from app.db.session import SessionLocal
 from app.services.chat_service import ChatService
 from app.services.document_service import DocumentService
+from app.services.fact_edit_service import FactEditService
 from app.services.field_edit_service import FieldEditService
 from app.services.storage import LocalStorage
 from app.worker.tasks import enqueue_document
@@ -68,6 +70,7 @@ def get_answerer(session: SessionDep, settings: SettingsDep) -> Answerer:
         candidates=settings.retrieval_candidates,
         min_similarity=settings.retrieval_min_similarity,
         rrf_k=settings.retrieval_rrf_k,
+        facts=FactRepository(session),
     )
     return Answerer(retriever, get_llm_provider())
 
@@ -96,6 +99,12 @@ def get_chat_service(session: SessionDep, settings: SettingsDep) -> ChatService:
         tz=settings.tzinfo,
         context_turns=settings.chat_context_turns,
         list_limit=settings.chat_list_limit,
+        fact_retriever=FactRetriever(
+            FactRepository(session),
+            get_embedding_provider(),
+            top_k=settings.retrieval_facts_top_k,
+            rrf_k=settings.retrieval_rrf_k,
+        ),
     )
 
 
@@ -111,7 +120,20 @@ def get_field_edit_service(session: SessionDep) -> FieldEditService:
     return FieldEditService(session)
 
 
+def get_fact_edit_service(session: SessionDep) -> FactEditService:
+    """Build the free datum edit service for a request.
+
+    Args:
+        session: Request session.
+
+    Returns:
+        The datum edit service.
+    """
+    return FactEditService(session, get_embedding_provider())
+
+
 DocumentServiceDep = Annotated[DocumentService, Depends(get_document_service)]
 FieldEditServiceDep = Annotated[FieldEditService, Depends(get_field_edit_service)]
+FactEditServiceDep = Annotated[FactEditService, Depends(get_fact_edit_service)]
 AnswererDep = Annotated[Answerer, Depends(get_answerer)]
 ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
