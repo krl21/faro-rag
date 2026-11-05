@@ -13,7 +13,7 @@ DOC = uuid.uuid4()
 
 
 def _row(name, value, status="ok", page=1):
-    return SimpleNamespace(name=name, value=value, status=status, page=page)
+    return SimpleNamespace(label=name, value=value, status=status, page=page)
 
 
 def _document(*rows):
