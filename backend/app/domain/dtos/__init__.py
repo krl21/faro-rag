@@ -5,6 +5,7 @@ from app.domain.dtos.chat_result import ChatResult
 from app.domain.dtos.chunk_draft import ChunkDraft
 from app.domain.dtos.extraction_result import ExtractionResult
 from app.domain.dtos.field_draft import FieldDraft
+from app.domain.dtos.field_fact import FieldFact
 from app.domain.dtos.filter_columns import FilterColumns
 from app.domain.dtos.interpreted_query import InterpretedQuery
 from app.domain.dtos.llm_document import LLMDocument
@@ -22,6 +23,7 @@ __all__ = [
     "ChunkDraft",
     "ExtractionResult",
     "FieldDraft",
+    "FieldFact",
     "FilterColumns",
     "InterpretedQuery",
     "LLMDocument",

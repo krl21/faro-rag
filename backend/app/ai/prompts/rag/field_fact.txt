@@ -1,0 +1,3 @@
+<dato id="$number" documento="$filename" pagina="$page">
+$label: $value$edited_note
+</dato>

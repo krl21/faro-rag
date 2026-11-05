@@ -24,7 +24,9 @@ _BULLET = re.compile(r"^\s*[-•*]\s+(.+)$", re.MULTILINE)
 _TAGGED_BLOCK = re.compile(r"<documento>\n?(.*?)\n?</documento>", re.DOTALL)
 _TODAY = re.compile(r"Fecha de hoy: (\d{4}-\d{2}-\d{2})")
 _REQUEST = re.compile(r"<peticion>\n?(.*?)\n?</peticion>", re.DOTALL)
-_FIRST_FRAGMENT = re.compile(r"<fragmento id=\"1\"[^>]*>\n?(.*?)\n?</fragmento>", re.DOTALL)
+_FIRST_SOURCE = re.compile(
+    r"<(?P<tag>dato|fragmento) id=\"1\"[^>]*>\n?(?P<body>.*?)\n?</(?P=tag)>", re.DOTALL
+)
 
 
 def document_text(prompt: str) -> str:
@@ -193,18 +195,18 @@ def extract_invoice(text: str) -> str:
 
 
 def answer(prompt: str) -> str:
-    """Answer by quoting the first retrieved fragment and citing it.
+    """Answer by quoting the first source (extracted field or fragment) and citing it.
 
     Args:
-        prompt: User prompt with the numbered fragments.
+        prompt: User prompt with the numbered sources.
 
     Returns:
         A short answer citing ``[1]``.
     """
-    match = _FIRST_FRAGMENT.search(prompt)
+    match = _FIRST_SOURCE.search(prompt)
     if not match:
         return "NO_EVIDENCE"
-    sentence = re.split(r"(?<=[.!?])\s", match.group(1).strip(), maxsplit=1)[0]
+    sentence = re.split(r"(?<=[.!?])\s", match.group("body").strip(), maxsplit=1)[0]
     return f"Según la documentación: {sentence[:300]} [1]"
 
 

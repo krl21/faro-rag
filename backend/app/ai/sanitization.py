@@ -8,7 +8,16 @@ as data; this module makes sure the text cannot break out of those tags.
 
 import re
 
-_TAG_NAMES = ("documento", "fragmento", "pregunta", "contexto", "historial", "mensaje", "peticion")
+_TAG_NAMES = (
+    "documento",
+    "fragmento",
+    "dato",
+    "pregunta",
+    "contexto",
+    "historial",
+    "mensaje",
+    "peticion",
+)
 _DELIMITER_TAGS = re.compile(rf"<\s*/?\s*({'|'.join(_TAG_NAMES)})\b[^>]*>", re.IGNORECASE)
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
