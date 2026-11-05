@@ -16,7 +16,7 @@ dependencies = [
     "celery[redis]>=5.4",
     "redis>=5.2",
     "litellm>=1.55",
-    "pypdf>=5.1",
+    "pypdfium2>=4.30",  # page count and text layer (Docling does the extraction)
     "slowapi>=0.1.9",
     "tzdata>=2024.2",  # IANA time zones (America/Toronto) inside the slim image
     "opentelemetry-api>=1.28",
@@ -31,7 +31,7 @@ dependencies = [
 [project.optional-dependencies]
 # Local embeddings (API and worker images). Not installed in the test image.
 local-embeddings = ["sentence-transformers>=3.3", "torch>=2.5"]
-# Advanced PDF extraction (worker image only). Enable with PDF_EXTRACTOR=docling.
+# PDF text extraction (worker image only): the only extractor of the application.
 docling = ["docling>=2.14", "torchvision>=0.20"]
 
 [dependency-groups]
