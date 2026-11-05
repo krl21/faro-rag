@@ -3,7 +3,7 @@
 import logging
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
 
 from app.api.deps import FieldEditServiceDep
 from app.api.mappers import to_field_out
@@ -50,3 +50,26 @@ def update_field(
     )
     field, document_type = service.edit(document_id, field_name, body.value)
     return to_field_out(field, document_type)
+
+
+@router.delete(
+    "/{document_id}/fields/{field_name}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        404: {"description": "document_not_found or field_not_found"},
+        409: {"description": "document_not_ready: the document is not processed"},
+    },
+)
+def delete_field(document_id: uuid.UUID, field_name: str, service: FieldEditServiceDep) -> Response:
+    """Delete a fixed field: the filters and the chat stop using it.
+
+    Args:
+        document_id: Document identifier.
+        field_name: Field name, for example ``policy_number``.
+        service: Field edit service.
+
+    Returns:
+        An empty ``204`` response.
+    """
+    service.delete(document_id, field_name)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
