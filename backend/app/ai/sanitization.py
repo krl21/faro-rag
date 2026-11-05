@@ -12,6 +12,7 @@ _TAG_NAMES = (
     "documento",
     "fragmento",
     "dato",
+    "datos_detectados",
     "pregunta",
     "contexto",
     "historial",
