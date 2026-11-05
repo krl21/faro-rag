@@ -49,10 +49,27 @@ describe('FieldRow', () => {
     expect(screen.queryByText(/Invalid LLM output/)).not.toBeInTheDocument();
   });
 
-  it('does not offer editing for read-only fields', () => {
+  it('does not offer editing or deleting for read-only fields', () => {
     renderRow(makeField({ name: 'document_type', value: 'policy', editable: false }));
     expect(screen.getByText('Póliza')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Editar/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Editar|Borrar/ })).not.toBeInTheDocument();
+  });
+
+  it('deletes the field after confirming in the row', async () => {
+    let deleted = false;
+    server.use(
+      http.delete(apiUrl('/documents/doc-1/fields/policy_number'), () => {
+        deleted = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+      http.get(apiUrl('/documents/doc-1'), () => HttpResponse.json({})),
+    );
+    renderRow();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Borrar Número de póliza' }));
+    expect(screen.getByText(/¿Borrar «Número de póliza»\?/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Borrar' }));
+    await vi.waitFor(() => expect(deleted).toBe(true));
   });
 
   it('shows the extracted value after an edit', () => {

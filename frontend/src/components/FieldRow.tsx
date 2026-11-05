@@ -1,17 +1,13 @@
-import { useState } from 'react';
-import type { ExtractedField, FieldValue } from '../api/types';
+import type { ExtractedField } from '../api/types';
+import { useDeleteField } from '../hooks/useDeleteField';
 import { useUpdateField } from '../hooks/useUpdateField';
 import { errorMessage } from '../lib/errorMessages';
 import { fieldDisplayStatus } from '../lib/fieldState';
 import { formatFieldValue, INVALID_VALUE_REASONS } from '../lib/fieldValue';
 import { formatPage } from '../lib/format';
 import { CONFIDENCE_LABELS, fieldLabel } from '../lib/labels';
-import { STATUS_APPEARANCE } from '../lib/statusAppearance';
-import { Button } from './Button';
+import { DataRow } from './DataRow';
 import { FieldEditor } from './FieldEditor';
-import styles from './FieldRow.module.css';
-import { EditIcon } from './icons/icons';
-import { StatusBadge } from './StatusBadge';
 
 interface FieldRowProps {
   documentId: string;
@@ -48,65 +44,45 @@ function noteText(field: ExtractedField): string | null {
   }
 }
 
+/** A fixed field of the document type. `document_type` is read-only (`editable: false`). */
 export function FieldRow({ documentId, field }: FieldRowProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const update = useUpdateField(documentId);
+  const remove = useDeleteField(documentId);
   const status = fieldDisplayStatus(field);
   const type = field.value_type;
   const label = fieldLabel(field.name);
-  const note = noteText(field);
-  const source = sourceText(field);
-
-  const save = (value: FieldValue) =>
-    update.mutate({ name: field.name, value }, { onSuccess: () => setIsEditing(false) });
-
-  const cancel = () => {
-    update.reset();
-    setIsEditing(false);
-  };
+  const format = (value: ExtractedField['value']) =>
+    value === null ? null : formatFieldValue(value, type, field.name);
 
   return (
-    <li className={styles.row} data-tone={STATUS_APPEARANCE[status].tone}>
-      <span className={styles.name}>{label}</span>
-      <div className={styles.value}>
-        {field.value === null ? (
-          <span className={styles.missing}>Sin valor</span>
-        ) : (
-          formatFieldValue(field.value, type, field.name)
-        )}
-        {note && <p className={styles.note}>{note}</p>}
-        {status === 'edited' && field.original_value != null && (
-          <p className={styles.original}>
-            Valor extraído: {formatFieldValue(field.original_value, type, field.name)}
-          </p>
-        )}
-      </div>
-      <span className={styles.meta}>{source}</span>
-      <div className={styles.side}>
-        <StatusBadge status={status} />
-        {field.editable && !isEditing && (
-          <Button
-            variant="ghost"
-            icon={<EditIcon size={18} />}
-            aria-label={`Editar ${label}`}
-            title="Editar valor"
-            onClick={() => setIsEditing(true)}
-          />
-        )}
-      </div>
-      {isEditing && (
-        <div className={styles.editor}>
-          <FieldEditor
-            fieldLabel={label}
-            type={type}
-            value={field.value}
-            isSaving={update.isPending}
-            error={update.isError ? errorMessage(update.error) : null}
-            onSave={save}
-            onCancel={cancel}
-          />
-        </div>
-      )}
-    </li>
+    <DataRow
+      label={label}
+      value={format(field.value)}
+      note={noteText(field)}
+      original={status === 'edited' ? format(field.original_value) : null}
+      meta={sourceText(field)}
+      status={status}
+      renderEditor={
+        field.editable
+          ? (close) => (
+              <FieldEditor
+                fieldLabel={label}
+                type={type}
+                value={field.value}
+                isSaving={update.isPending}
+                error={update.isError ? errorMessage(update.error) : null}
+                onSave={(value) => update.mutate({ name: field.name, value }, { onSuccess: close })}
+                onCancel={() => {
+                  update.reset();
+                  close();
+                }}
+              />
+            )
+          : undefined
+      }
+      deletion={
+        field.editable ? { run: () => remove.mutate(field.name), state: remove } : undefined
+      }
+    />
   );
 }
