@@ -1,0 +1,17 @@
+.form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+}
+
+/* One line high at first; the component grows it with the text. */
+.form .question {
+  display: block;
+  min-height: var(--control-height);
+  overflow-y: hidden;
+  resize: none;
+}
