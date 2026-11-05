@@ -28,7 +28,8 @@
   border-bottom: 0;
 }
 
-.open {
+.open,
+.static {
   display: block;
   min-height: var(--control-height);
   padding: 0;
@@ -37,6 +38,9 @@
   color: var(--color-text);
   font-weight: 600;
   text-align: left;
+}
+
+.open {
   cursor: pointer;
 }
 
