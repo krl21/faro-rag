@@ -48,3 +48,12 @@
 .ghost:not(:disabled):hover {
   color: var(--color-accent);
 }
+
+.danger {
+  background: var(--color-danger);
+  color: var(--color-on-accent);
+}
+
+.danger:not(:disabled):hover {
+  filter: brightness(1.08);
+}
