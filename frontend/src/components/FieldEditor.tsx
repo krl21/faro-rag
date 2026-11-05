@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import type { FieldValue, FieldValueType } from '../api/types';
 import { draftError, EDITOR_INPUTS, fromDraft, toDraft, type EditorInput } from '../lib/fieldValue';
-import { Button } from './Button';
+import { EditorFrame } from './EditorFrame';
 import styles from './FieldEditor.module.css';
 import forms from './forms.module.css';
 
@@ -36,7 +36,7 @@ function InputControl({
   );
 }
 
-/** Generic editor: renders the inputs of the value type (`EDITOR_INPUTS`). */
+/** Editor of a fixed field: renders the inputs of the value type (`EDITOR_INPUTS`). */
 export function FieldEditor({
   fieldLabel,
   type,
@@ -49,16 +49,17 @@ export function FieldEditor({
   const [draft, setDraft] = useState(() => toDraft(value, type));
   const problem = draftError(draft, type);
   const parsed = problem ? null : fromDraft(draft, type);
-  // The API error is from the last save; the local problem is about what is typed now.
-  const message = problem ?? error;
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (parsed !== null) onSave(parsed);
-  };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} aria-label={`Editar ${fieldLabel}`}>
+    <EditorFrame
+      title={`Editar ${fieldLabel}`}
+      canSave={parsed !== null}
+      isSaving={isSaving}
+      // The API error is from the last save; the local problem is about what is typed now.
+      message={problem ?? error}
+      onSave={() => parsed !== null && onSave(parsed)}
+      onCancel={onCancel}
+    >
       <div className={styles.inputs}>
         {EDITOR_INPUTS[type].map((input) => (
           <label key={input.key} className={forms.label}>
@@ -74,19 +75,6 @@ export function FieldEditor({
           </label>
         ))}
       </div>
-      {message && (
-        <p className={styles.error} role="alert">
-          {message}
-        </p>
-      )}
-      <div className={styles.actions}>
-        <Button type="submit" disabled={parsed === null || isSaving}>
-          {isSaving ? 'Guardando…' : 'Guardar'}
-        </Button>
-        <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
-          Cancelar
-        </Button>
-      </div>
-    </form>
+    </EditorFrame>
   );
 }
