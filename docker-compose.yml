@@ -97,8 +97,9 @@ services:
       context: ./backend
       target: api
     <<: *backend-env
-    # --reload restarts uvicorn when Compose Watch syncs a changed file.
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    # --reload restarts uvicorn when Compose Watch syncs a changed file. It only
+    # watches *.py by default: --reload-include adds the prompts (*.txt).
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-include", "*.txt"]
     volumes:
       - uploads:/data/uploads
       - hf-cache:/data/hf-cache
