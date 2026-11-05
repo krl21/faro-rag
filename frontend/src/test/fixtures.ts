@@ -1,4 +1,10 @@
-import type { AskResponse, DocumentDetail, DocumentSummary, ExtractedField } from '../api/types';
+import type {
+  AskResponse,
+  DocumentDetail,
+  DocumentFact,
+  DocumentSummary,
+  ExtractedField,
+} from '../api/types';
 
 export function makeDocument(overrides: Partial<DocumentSummary> = {}): DocumentSummary {
   return {
@@ -32,8 +38,23 @@ export function makeField(overrides: Partial<ExtractedField> = {}): ExtractedFie
   };
 }
 
+export function makeFact(overrides: Partial<DocumentFact> = {}): DocumentFact {
+  return {
+    id: 7,
+    label: 'TOTAL FACTURA',
+    value: '1.548,80 €',
+    page: 1,
+    table_index: null,
+    row_index: null,
+    status: 'ok',
+    original_value: null,
+    edited_at: null,
+    ...overrides,
+  };
+}
+
 export function makeDetail(overrides: Partial<DocumentDetail> = {}): DocumentDetail {
-  return { ...makeDocument(), chunk_count: 4, fields: [makeField()], ...overrides };
+  return { ...makeDocument(), chunk_count: 4, fields: [makeField()], facts: [], ...overrides };
 }
 
 export function makeAnswer(overrides: Partial<AskResponse> = {}): AskResponse {
