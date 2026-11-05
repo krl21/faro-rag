@@ -32,6 +32,10 @@ const MESSAGES: Record<string, string> = {
   // Field editing
   field_not_found: 'Este campo no existe para el tipo de documento.',
   invalid_field_value: 'El valor no es válido. Revisa el formato e inténtalo de nuevo.',
+  // Free data editing
+  fact_not_found: 'Este dato ya no existe.',
+  invalid_fact_value:
+    'La etiqueta o el valor no son válidos: no pueden estar vacíos ni ser demasiado largos.',
   // Generic
   document_not_found: 'El documento ya no existe.',
   conversation_not_found: 'La conversación ya no existe. Empieza una nueva.',
