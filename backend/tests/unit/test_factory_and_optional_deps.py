@@ -9,14 +9,14 @@ from pathlib import Path
 
 import pytest
 
-from app.ai.ingestion.pdf_extractor import build_pdf_extractor
-from app.ai.ingestion.pypdf_extractor import PypdfExtractor
+from app.ai.ingestion.docling_extractor import DoclingExtractor
 from app.ai.providers.factory import build_embedding_provider, build_llm_provider
 from app.ai.providers.fake_provider import FakeEmbeddingProvider, FakeLLMProvider
 from app.ai.providers.litellm_provider import LiteLLMChatProvider, LiteLLMEmbeddingProvider
 from app.ai.providers.sentence_transformers_provider import SentenceTransformersEmbeddingProvider
 from app.config import Settings
 from app.core.errors import ExtractorUnavailableError, ProviderError
+from tests.fixtures.pdf_factory import make_pdf
 
 HAS_ST = importlib.util.find_spec("sentence_transformers") is not None
 HAS_DOCLING = importlib.util.find_spec("docling") is not None
@@ -51,12 +51,6 @@ def test_unknown_provider_is_rejected_by_settings():
         Settings(llm_provider="openai-directo")
 
 
-def test_pypdf_is_the_default_extractor(monkeypatch):
-    # Independent of the developer's .env or shell (PDF_EXTRACTOR may be set there).
-    monkeypatch.delenv("PDF_EXTRACTOR", raising=False)
-    assert isinstance(build_pdf_extractor(Settings(_env_file=None)), PypdfExtractor)
-
-
 @pytest.mark.skipif(HAS_ST, reason="sentence-transformers is installed in this image")
 def test_missing_sentence_transformers_gives_a_clear_error():
     provider = SentenceTransformersEmbeddingProvider("any-model")
@@ -66,6 +60,7 @@ def test_missing_sentence_transformers_gives_a_clear_error():
 
 @pytest.mark.skipif(HAS_DOCLING, reason="docling is installed in this image")
 def test_missing_docling_gives_a_clear_error(tmp_path: Path):
-    extractor = build_pdf_extractor(Settings(pdf_extractor="docling"))
+    path = tmp_path / "x.pdf"
+    path.write_bytes(make_pdf(["Póliza de prueba"]))
     with pytest.raises(ExtractorUnavailableError, match="docling"):
-        extractor.extract(tmp_path / "x.pdf", max_pages=10)
+        DoclingExtractor().extract(path, max_pages=10)
