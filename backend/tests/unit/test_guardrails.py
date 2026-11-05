@@ -61,3 +61,11 @@ def test_no_marker_is_greater_than_the_number_of_citations():
     checked = check_answer("x [6] y [3] z [6] w [5] v [2]", fragment_count=6)
     markers = {int(m) for m in re.findall(r"\[(\d+)\]", checked.text)}
     assert markers == set(range(1, len(checked.cited) + 1))
+
+
+def test_partial_answer_keeps_the_cited_parts():
+    text = "El titular es ACME [2]. El importe: No aparece en la documentación. NO_EVIDENCE"
+    checked = check_answer(text, fragment_count=2)
+    assert checked.has_evidence
+    assert checked.text == "El titular es ACME [1]. El importe: No aparece en la documentación."
+    assert checked.cited == [2]
