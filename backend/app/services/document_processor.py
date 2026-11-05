@@ -7,9 +7,10 @@ from opentelemetry import trace
 
 from app.ai.extraction.field_extractor import FieldExtractor
 from app.ai.extraction.field_indexing import with_filter_columns
-from app.ai.extraction.prompts import pages_to_text
+from app.ai.extraction.prompts import facts_to_text, pages_to_text
 from app.ai.ingestion.chunker import chunk_pages
 from app.ai.ingestion.embedder import embed_texts
+from app.ai.ingestion.fact_parsing import describe
 from app.ai.ingestion.pdf_extractor import PdfExtractor, ensure_has_text
 from app.ai.providers.base import EmbeddingProvider
 from app.config import Settings
@@ -19,6 +20,7 @@ from app.core.telemetry import get_tracer
 from app.db.repositories import (
     ChunkRepository,
     DocumentRepository,
+    FactRepository,
     FieldRepository,
 )
 from app.db.session import session_scope
@@ -164,22 +166,32 @@ class DocumentProcessor:
         pdf_path = self._storage.path(storage_path)
         with (
             tracer.start_as_current_span("ingest.extract_text") as span,
-            log_step(
-                logger, "text extracted", document_id=doc_id, extractor=settings.pdf_extractor.value
-            ) as out,
+            log_step(logger, "text extracted", document_id=doc_id) as out,
         ):
-            pages = self._extractor.extract(pdf_path, max_pages=settings.max_pages)
+            extracted = self._extractor.extract(pdf_path, max_pages=settings.max_pages)
+            pages, facts = extracted.pages, extracted.facts
             page_count = len(pages)
             span.set_attribute("pdf.pages", page_count)
             pages = ensure_has_text(pages)
             span.set_attribute("pdf.pages_with_text", len(pages))
+            span.set_attribute("pdf.facts", len(facts))
             out.update(
-                pages=page_count, pages_with_text=len(pages), chars=sum(len(p.text) for p in pages)
+                pages=page_count,
+                pages_with_text=len(pages),
+                chars=sum(len(p.text) for p in pages),
+                facts=len(facts),
             )
             logger.debug(
                 "extracted text by page",
                 extra=fields(
                     document_id=doc_id, pages=[{"page": p.page, "text": p.text} for p in pages]
+                ),
+            )
+            logger.debug(
+                "label-value data found",
+                extra=fields(
+                    document_id=doc_id,
+                    facts=[{"page": f.page, "text": describe(f.label, f.value)} for f in facts],
                 ),
             )
 
@@ -188,6 +200,7 @@ class DocumentProcessor:
             filename=filename,
             text=pages_to_text([(p.page, p.text) for p in pages]),
             page_count=page_count,
+            facts=facts_to_text(facts),
         )
         with (
             tracer.start_as_current_span("extract.classify") as span,
@@ -215,7 +228,7 @@ class DocumentProcessor:
                 "document is neither a policy nor an invoice: chunks and fields skipped",
                 extra=fields(document_id=doc_id),
             )
-            chunks, vectors, drafts = [], [], [type_field]
+            chunks, vectors, drafts, facts, fact_vectors = [], [], [type_field], [], []
         else:
             with (
                 tracer.start_as_current_span("ingest.chunk") as span,
@@ -248,15 +261,18 @@ class DocumentProcessor:
                     "chunks embedded",
                     document_id=doc_id,
                     chunks=len(chunks),
+                    facts=len(facts),
                     model=self._embeddings.model,
                 ) as out,
             ):
-                vectors = embed_texts(
+                # Chunks and label-value data in the same calls: one batch loop.
+                all_vectors = embed_texts(
                     self._embeddings,
-                    [c.content for c in chunks],
+                    [c.content for c in chunks] + [describe(f.label, f.value) for f in facts],
                     batch_size=settings.embedding_batch_size,
                     expected_dim=settings.embedding_dim,
                 )
+                vectors, fact_vectors = all_vectors[: len(chunks)], all_vectors[len(chunks) :]
                 span.set_attribute("chunks.count", len(vectors))
                 out.update(vectors=len(vectors), dimension=settings.embedding_dim)
 
@@ -323,11 +339,17 @@ class DocumentProcessor:
             # Each field row also stores its typed filter columns (same transaction).
             stored_fields = with_filter_columns(drafts)
             FieldRepository(session).replace_for_document(document_id, stored_fields)
+            FactRepository(session).replace_for_document(document_id, facts, fact_vectors)
             filterable = sum(1 for f in stored_fields if f.filter_columns)
             stored.page_count = page_count
             stored.document_type = document_type.value if document_type else None
             documents.set_status(stored, DocumentStatus.DONE)
-            out.update(chunks=len(chunks), fields=len(drafts), filterable_fields=filterable)
+            out.update(
+                chunks=len(chunks),
+                fields=len(drafts),
+                filterable_fields=filterable,
+                facts=len(facts),
+            )
 
         trace.get_current_span().set_attribute("chunks.count", len(chunks))
         logger.info(
