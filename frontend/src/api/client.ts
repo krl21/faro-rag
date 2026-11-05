@@ -2,7 +2,7 @@ import { config } from '../config';
 import { ApiError, NETWORK_ERROR, UNKNOWN_ERROR } from './ApiError';
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH';
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   /** JSON body; `FormData` is sent as multipart. */
   body?: unknown;
   /** Non-2xx statuses whose body is still a valid result (for example 503 in readiness). */
@@ -37,7 +37,7 @@ async function readJson(response: Response): Promise<unknown> {
 }
 
 /**
- * Call the API and return the parsed JSON body.
+ * Call the API and return the parsed JSON body (`null` for an empty one, such as a 204).
  *
  * @throws ApiError on a network failure or a non-accepted status.
  */
