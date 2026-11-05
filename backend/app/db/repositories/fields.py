@@ -24,19 +24,25 @@ class FieldRepository:
         self._session = session
 
     def replace_for_document(self, document_id: uuid.UUID, drafts: Sequence[FieldDraft]) -> None:
-        """Replace every extracted field of a document in the current transaction.
+        """Replace the known fields of a document in the current transaction.
+
+        The free data (rows not ``is_predefined``) are left alone: ``FactRepository``
+        replaces them.
 
         Args:
             document_id: Owning document.
             drafts: New fields.
         """
         self._session.execute(
-            delete(ExtractedField).where(ExtractedField.document_id == document_id)
+            delete(ExtractedField).where(
+                ExtractedField.document_id == document_id, ExtractedField.is_predefined.is_(True)
+            )
         )
         self._session.add_all(
             ExtractedField(
                 document_id=document_id,
-                name=d.name,
+                label=d.name,
+                is_predefined=True,
                 value=d.value,
                 confidence=d.confidence,
                 status=d.status,
@@ -50,7 +56,7 @@ class FieldRepository:
         self._session.flush()
 
     def get(self, document_id: uuid.UUID, name: str) -> ExtractedField | None:
-        """Fetch one field of a document.
+        """Fetch one fixed field of a document.
 
         Args:
             document_id: Owning document.
@@ -60,9 +66,20 @@ class FieldRepository:
             The field, or ``None`` if the document has no field with that name.
         """
         stmt = select(ExtractedField).where(
-            ExtractedField.document_id == document_id, ExtractedField.name == name
+            ExtractedField.document_id == document_id,
+            ExtractedField.is_predefined.is_(True),
+            ExtractedField.label == name,
         )
         return self._session.scalar(stmt)
+
+    def delete(self, field: ExtractedField) -> None:
+        """Delete a field in the current transaction.
+
+        Args:
+            field: The field.
+        """
+        self._session.delete(field)
+        self._session.flush()
 
 
 def _filter_columns(draft: FieldDraft) -> dict[str, Any]:
