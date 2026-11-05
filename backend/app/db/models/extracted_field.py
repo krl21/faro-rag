@@ -5,8 +5,10 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     Date,
     DateTime,
     ForeignKey,
@@ -15,11 +17,13 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
-    UniqueConstraint,
+    false,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.config import get_settings
 from app.db.models.base import Base
 
 if TYPE_CHECKING:
@@ -27,7 +31,23 @@ if TYPE_CHECKING:
 
 
 class ExtractedField(Base):
-    """A structured value extracted from a document, one row per field.
+    """A label-value datum of a document: a fixed field or a free datum.
+
+    Every row is a ``(label, value)`` pair; ``is_predefined`` tells the two kinds apart:
+
+    - **Fixed fields** (``is_predefined``): the known list of each document type.
+      ``label`` is the field key (``invoice_amount``, ``holder``...), unique
+      per document; extracted by the LLM and validated by type. They feed the
+      filters, the field screen and the chat.
+    - **Free data** (not ``is_predefined``): every label-value datum found in the
+      tables and "campo: valor" lines of the document. ``label`` is the label
+      as written (``TOTAL FACTURA``) and may repeat; ``value`` is the text as
+      written or, for a table row, its columns (stored as a list of
+      ``{"column", "value"}`` so their order is kept, see ``fact_values``).
+      They are not validated by type and have no filter columns;
+      ``embedding`` lets the chat pick the ones relevant to a question.
+
+    The user can edit and delete both kinds.
 
     ``value`` keeps the value as shown and edited (JSON). The typed columns
     (``text_value``, ``number_value`` + ``currency``, ``date_from`` /
@@ -42,23 +62,31 @@ class ExtractedField(Base):
 
     __tablename__ = "extracted_fields"
     __table_args__ = (
-        UniqueConstraint("document_id", "name", name="uq_field_per_document"),
-        Index("ix_extracted_fields_text", "name", "text_value"),
+        # One row per fixed field and document; free labels may repeat.
+        Index(
+            "uq_predefined_field_per_document",
+            "document_id",
+            "label",
+            unique=True,
+            postgresql_where=text("is_predefined"),
+        ),
+        Index("ix_extracted_fields_text", "label", "text_value"),
         Index(
             "ix_extracted_fields_text_trgm",
             "text_value",
             postgresql_using="gin",
             postgresql_ops={"text_value": "gin_trgm_ops"},
         ),
-        Index("ix_extracted_fields_number", "name", "number_value"),
-        Index("ix_extracted_fields_dates", "name", "date_from", "date_to"),
+        Index("ix_extracted_fields_number", "label", "number_value"),
+        Index("ix_extracted_fields_dates", "label", "date_from", "date_to"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     document_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("documents.id", ondelete="CASCADE"), index=True
     )
-    name: Mapped[str] = mapped_column(String(64))
+    label: Mapped[str] = mapped_column(String(255))
+    is_predefined: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     value: Mapped[Any | None] = mapped_column(JSONB)
     confidence: Mapped[str | None] = mapped_column(String(10))
     status: Mapped[str] = mapped_column(String(10))
@@ -74,6 +102,11 @@ class ExtractedField(Base):
     currency: Mapped[str | None] = mapped_column(String(3))
     date_from: Mapped[date | None] = mapped_column(Date)
     date_to: Mapped[date | None] = mapped_column(Date)
+
+    # Free data only: position in its table and embedding of ``label: value``.
+    table_index: Mapped[int | None] = mapped_column(Integer)
+    row_index: Mapped[int | None] = mapped_column(Integer)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(get_settings().embedding_dim))
 
     document: Mapped["Document"] = relationship(back_populates="fields")
 
