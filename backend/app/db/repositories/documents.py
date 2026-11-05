@@ -38,14 +38,15 @@ class DocumentRepository:
 
         Args:
             document_id: Document identifier.
-            with_fields: Whether to eagerly load the extracted fields.
+            with_fields: Whether to eagerly load the known fields and the free
+                label-value data.
 
         Returns:
             The document, or ``None`` when it does not exist.
         """
         stmt = select(Document).where(Document.id == document_id)
         if with_fields:
-            stmt = stmt.options(selectinload(Document.fields))
+            stmt = stmt.options(selectinload(Document.fields), selectinload(Document.facts))
         return self._session.scalars(stmt).first()
 
     def get_by_hash(self, content_hash: str) -> Document | None:
