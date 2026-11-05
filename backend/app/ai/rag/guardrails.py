@@ -11,9 +11,11 @@ _CITATION = re.compile(r"\[(\d{1,3})\]")
 def check_answer(text: str, fragment_count: int) -> CheckedAnswer:
     """Validate the citations of a generated answer.
 
-    An answer is rejected (``has_evidence=False``) when the model reports
+    An answer is rejected (``has_evidence=False``) when nothing is left but
     ``NO_EVIDENCE`` or when it does not cite any of the provided fragments:
     an uncited answer cannot be verified, so it is treated as invented.
+    A partial answer (some parts cited, others reported as missing) is kept;
+    a stray ``NO_EVIDENCE`` inside it is removed.
     Citation numbers that do not correspond to a provided fragment are removed.
 
     The model cites fragments by their position in the prompt (``[5]`` is the
@@ -29,8 +31,8 @@ def check_answer(text: str, fragment_count: int) -> CheckedAnswer:
     Returns:
         The checked answer.
     """
-    stripped = text.strip()
-    if not stripped or NO_EVIDENCE_TOKEN in stripped:
+    stripped = text.replace(NO_EVIDENCE_TOKEN, "").strip()
+    if not stripped:
         return CheckedAnswer(text="", cited=[], has_evidence=False)
 
     new_numbers: dict[int, int] = {}  # Fragment number -> citation marker.
