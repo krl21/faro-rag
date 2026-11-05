@@ -8,7 +8,7 @@ from celery import Task
 from sqlalchemy.exc import OperationalError
 
 from app.ai.extraction.field_extractor import FieldExtractor
-from app.ai.ingestion.pdf_extractor import build_pdf_extractor
+from app.ai.ingestion.docling_extractor import DoclingExtractor
 from app.ai.providers.factory import get_embedding_provider, get_llm_provider
 from app.config import get_settings
 from app.core.errors import ProviderError
@@ -35,7 +35,7 @@ def get_processor() -> DocumentProcessor:
     return DocumentProcessor(
         settings=settings,
         storage=LocalStorage(settings.storage_dir),
-        extractor=build_pdf_extractor(settings),
+        extractor=DoclingExtractor(),
         embeddings=get_embedding_provider(),
         field_extractor=FieldExtractor(
             get_llm_provider(),
